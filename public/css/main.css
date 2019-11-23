@@ -1,0 +1,38 @@
+html, body {
+    padding: 0;
+    margin: 0;
+}
+
+a {
+    text-decoration: none;
+}
+
+.pagewarp {
+    display: grid;
+    grid-template-areas:
+    "header header header"
+    "nav nav nav"
+    "article article article"
+    "footer footer footer";
+    grid-template-rows: 60px 20px 1fr 60px;
+    grid-template-columns: 1fr;
+    grid-gap: 10px;
+    height: 100vh;
+    margin: 0;
+}
+
+#header {
+    grid-area: header;
+}
+
+#nav {
+    grid-area: nav;
+}
+
+#content {
+    grid-area: article;
+}
+
+#footer {
+    grid-area: footer;
+}

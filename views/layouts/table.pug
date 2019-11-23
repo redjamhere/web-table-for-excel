@@ -1,0 +1,87 @@
+.w-modal
+  .change-data-modal.m-warper
+    .m-header
+      h2 Изменение запись
+      span(id="m-close") 
+        i(class="fas fa-times")
+    .m-textarea
+      textarea(class="m-input form-control" id="m-input" name="data-input" rows="5")
+    .m-buttons
+      button(id="m-save" name="m-save" class="btn btn-success") Сохранить в таблицу
+
+.w-modal-file
+  .change-data-modal-f.m-warper-f
+    .mf-header
+      h2  
+      span(id="mf-close") 
+        i(class="fas fa-times")
+    .mf-form
+        label(for="upfile" id="f-label")
+          img(src="./img/excel.png", alt="")
+        input(type="file" name="upfile" id="upfile")
+        button(id="upfile-btn" class="btn btn-success") Загрузить
+    .mf-footer
+      p(title="Поддерживаемые форматы *.xls, *.xlsx, *.csv") Поддерживаемые форматы *.xls, *.xlsx, *.csv
+
+.pagewarp
+  nav(id="nav")
+    ul(class="n-ull")
+      div(class="n-btn-wrap")
+        li(id="n-item1" class="n-li")
+          button(id="n-btn uploadExcel" class="btn btn-success upex") <i class="fas fa-upload"></i> Выгрузить из Excel
+        li(id="n-item2" class="n-li")
+          button(id="n-btn downloadExcel" class="btn btn-warning") <i class="fas fa-download"></i> Загрузить в Excel
+        li(id="n-item3" class="n-li")
+          .input-group
+            .input-group-prepend
+              label.input-group-text(for='inputGroupSelect01') Загруженные
+            select#inputGroupSelect01.custom-select
+              option(selected='') Выберите таблицу
+              option(value='1') One
+              option(value='2') Two
+              option(value='3') Three
+      div(class="n-btn-wrap")
+        li(id="n-item4" class="n-li")
+          button(style="" id="n-btn" class="btn n-add ") <i class="fas fa-plus"></i> Добавить
+        li(id="n-item5" class="n-li")
+          button(style="" id="n-btn" class="btn n-undo btn-info") <i class="fas fa-arrow-left"></i> Отменить изменение
+        li(id="n-item6" class="n-li")
+          button(style="" id="n-btn" class="btn n-save btn-primary") <i class="fas fa-save"></i> Сохранить
+        li(id="n-item7" class="n-li")
+          input(type="text" id="n-search" class="form-control n-inp" placeholder="Поиск...")
+
+
+ 
+  article(id="article")
+    .tablewarp
+      .table
+        table(id="t-tbl" class="t-tbl table table-striped table-bordered table-hover" cellspacing="0")
+          thead
+            tr
+              th(scope="col") ID
+              th(scope="col") Поз. заявки СП
+              th(scope="col") Номер заявки СП
+              th(scope="col") Материал
+              th(scope="col") КрТекстМатериала
+              th(scope="col") Единица измерения
+              th(scope="col") Кол-во (заявка СП)
+              th(scope="col") Цена без НДС
+              th(scope="col") Стоим. без НДС
+              th(scope="col") Год заяв. кампании
+              th(scope="col") Статус
+              th(scope="col") Дата поставки
+              th(scope="col") Срок доставки, дн
+              th(scope="col") Дата согласовния (заявка СП)
+              th(scope="col") ЗаявкаСП Описание
+              th(scope="col") Таб. номер
+              th(scope="col") Прайс: поставщик наим
+              th(scope="col") Номер договора
+              th(scope="col") Заказчик
+              th(scope="col") Группа "Состояния"
+              th(scope="col") Адрес размещения
+              th(scope="col") ФИО пользователя/подразделение
+              th(scope="col") Технические аттрибуты
+          tbody(id='t-body')               
+    .no-rows
+      h1 Нет данных для отображения 
+      

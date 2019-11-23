@@ -1,0 +1,13 @@
+.pagewarp
+  include header.pug
+  article(id="article")
+    .login-warper
+      .l-block
+        .l-header
+          h3 Учетная запись
+        .l-inputs
+          input(type="text" placeholder="Логин" class="password form-control" id="login")
+          input(type="password" placeholder="Пароль" class="password form-control" id="password")
+        .l-buttons
+          button(type="button" class="l-btn btn btn-outline-primary" id="l-btn") Вход
+  include footer.pug
