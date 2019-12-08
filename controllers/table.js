@@ -1,3 +1,6 @@
+$.ajax({
+  url: 'http://loclhost:5000/check-users',
+})
 function createTable (result) {
           // insert rows in table
           for (let i = 0; i < result.length; i++){

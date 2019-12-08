@@ -6,6 +6,8 @@ const formidable = require('formidable')
 const funcs = require('./core/functions')
 const fs = require('fs')
 const db = require('./config/db')
+const TokenGenerator = require('uuid-token-generator');
+const url = require('url')
 // const router = require('./routes/router')
 
 var server = express()
@@ -46,6 +48,37 @@ server.get('/', (req, res) => {
   res.render('index')
 })
 
+var users = []
+con.query("select * from users",(err, result, fields) => {
+  for(let i = 0; i < result.length; i++) {
+    users.push(result[i])
+  }
+})
+
+var loginnedUser = {
+    login: '',
+    token: ''
+}
+server.post('/login', (req, res) => {
+  for (i = 0; i < users.length; i++) {
+    if ((req.body.username==users[i].login)&&(req.body.password===users[i].password)) {
+      var newLog = users[i].login
+      const tokgen = new TokenGenerator();
+      loginnedUser.login = newLog
+      loginnedUser.token = tokgen.generate() // Default is a 128-bit token encoded in base58
+    }
+  }
+  console.log(loginnedUser)
+  res.send('ok')
+})
+
+
+server.get('/check-users', (req, res) => {
+  if (loginnedUser.token.length > 0 ) {
+    res.redirect('/')
+  }
+})
+
 //table requests
 server.post('/fileupload', (req, res) => {
     if (!req.files || Object.keys(req.files).length === 0) {
@@ -73,7 +106,9 @@ server.post('/fileupload', (req, res) => {
       // })
       res.send('ok')
     });
-})
+}) 
+
+
 
 //gettable
 server.get('/get-table', (req, res) => {
