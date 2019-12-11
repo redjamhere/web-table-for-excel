@@ -1,14 +1,12 @@
 const express = require('express')
+const session = require('express-session')
 const bodyParser  = require('body-parser')
 const exFile = require('express-fileupload')
 const port = 5000
-const formidable = require('formidable')
 const funcs = require('./core/functions')
 const fs = require('fs')
 const db = require('./config/db')
-const TokenGenerator = require('uuid-token-generator');
-const url = require('url')
-// const router = require('./routes/router')
+const TokenGenerator = require('uuid-token-generator')
 
 var server = express()
 
@@ -27,6 +25,12 @@ server.use(function(req, res, next) {
   next()
 })
 
+server.use(session({
+	secret: 'secret',
+	resave: true,
+	saveUninitialized: true
+}));
+
 server.use(exFile())
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({
@@ -40,43 +44,40 @@ server.use(express.static(__dirname + '/views'))
 server.set('view engine', 'pug')
 server.set('views', __dirname + '/views')
 
-server.get('/auth', (req, res) => {
-  res.render('auth')
-})
-
 server.get('/', (req, res) => {
-  res.render('index')
+  if (req.session.loggedin) {
+		res.render('index')
+	} else {
+		res.render('auth')
+	}
+	res.end();
 })
 
-var users = []
-con.query("select * from users",(err, result, fields) => {
-  for(let i = 0; i < result.length; i++) {
-    users.push(result[i])
-  }
-})
+server.post('/login', function(request, response) {
+	var username = request.body.username;
+	var password = request.body.password;
+	if (username && password) {
+	  con.query('SELECT * FROM users WHERE username = ? AND password = ?', [username, password], function(error, results, fields) {
+			if (results.length > 0) {
+				request.session.loggedin = true;
+        request.session.userdata = results[0]
+        request.session.table = results[0].Permission
+        response.redirect('/');
+			} else {
+				response.send('Incorrect Username and/or Password!');
+			}			
+			response.end();
+		});
+	} else {
+		response.send('Please enter Username and Password!');
+		response.end();
+	}
+});
 
-var loginnedUser = {
-    login: '',
-    token: ''
-}
-server.post('/login', (req, res) => {
-  for (i = 0; i < users.length; i++) {
-    if ((req.body.username==users[i].login)&&(req.body.password===users[i].password)) {
-      var newLog = users[i].login
-      const tokgen = new TokenGenerator();
-      loginnedUser.login = newLog
-      loginnedUser.token = tokgen.generate() // Default is a 128-bit token encoded in base58
-    }
-  }
-  console.log(loginnedUser)
-  res.send('ok')
-})
-
-
-server.get('/check-users', (req, res) => {
-  if (loginnedUser.token.length > 0 ) {
-    res.redirect('/')
-  }
+server.post('/logout', (req,res) => {
+  console.log(req.session)
+  req.session.destroy()
+  res.redirect('/')
 })
 
 //table requests
@@ -86,35 +87,46 @@ server.post('/fileupload', (req, res) => {
     }
 
     var formats = ['xls', 'xlsx', 'csv']
-    // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
     let excelFile = req.files[0];
     for (let i = 0; i < formats.length; i++) {
       i++
     }
-    // se the mv() method to place the file somewhere on your server
     excelFile.mv('./public/excelImports/' + excelFile.name, function(err) {
       if (err)
         return res.send('Неверный формат');
       var sheets = funcs.excelToDB('./public/excelImports/' + excelFile.name)
-      var sql = "INSERT INTO uchettable (ПоззаявкиСП, НомерзаявкиСП, Материал, КрТекстМатериала, Единицаизмерения, КолвозаявкаСП, ЦенабезНДС, СтоимбезНДС, Годзаявкампании, Статус, Датапоставки, Срокдоставкидн, ДатасогласованиязаявкаСП, ЗаявкаСПОписание, Taбномер, Прайспоставщикнаим, Номердоговора, Заказчик, ГруппаСостояние, Адресразмещения, ФИОпользователяподразделение, Техническиеатребуты)VALUES ?";
+      var sql = `INSERT INTO ${req.session.userdata.OtdelName} (ПоззаявкиСП, НомерзаявкиСП, Материал, КрТекстМатериала, Единицаизмерения, КолвозаявкаСП, ЦенабезНДС, СтоимбезНДС, Годзаявкампании, Статус, Датапоставки, Срокдоставкидн, ДатасогласованиязаявкаСП, ЗаявкаСПОписание, Taбномер, Прайспоставщикнаим, Номердоговора, Заказчик, ГруппаСостояние, Адресразмещения, ФИОпользователяподразделение, Техническиеатребуты)VALUES ?`;
       con.query(sql, [sheets], function (err, result) {
         if (err) throw err;
         console.log("Number of records inserted: " + result.affectedRows);
       });
-      // con.query(`insert into tableslist (tabelName, userLogin) values (${excelFile.name}, 'user')`, err => {
-      //   console.log(err)
-      // })
       res.send('ok')
     });
 }) 
 
 
-
 //gettable
 server.get('/get-table', (req, res) => {
-  con.query('SELECT * FROM uchettable', (err, result, fields) => {
-      (result.length > 0 || result != undefined) ? res.send(result) : res.send('No rows')
+  console.log(req.session)
+  con.query(`select OtdelSmallName from otdeli where id = ${parseInt(req.session.userdata.OtdelNum)}`,(err, result, fields) => {
+    console.log(result[0].OtdelSmallName)
+    con.query(`select * from ${result[0].OtdelSmallName}`, (err, result, fields) => {
+      res.send(result)
+    })
   })
+})
+
+server.get('/table-list', (req, res) => {
+  con.query(`SELECT Permission FROM users`, (err, result, fields) => {
+    let pers = []
+    for(let i = 0; i < result.length; i++) {
+      if(parseInt(req.session.userdata.Permission) <= parseInt(result[i].Permission)) {
+        pers.push(result[i].Permission)
+      }
+    }
+    res.send(pers)
+  })
+
 })
 
 server.post('/add-data', (req, res) => {
@@ -127,7 +139,7 @@ server.post('/add-data', (req, res) => {
     }
   }
   console.log(str)
-  var sql = `INSERT INTO uchettable (ПоззаявкиСП, НомерзаявкиСП, Материал, КрТекстМатериала, Единицаизмерения, КолвозаявкаСП, ЦенабезНДС, СтоимбезНДС, Годзаявкампании, Статус, Датапоставки, Срокдоставкидн, ДатасогласованиязаявкаСП, ЗаявкаСПОписание, Taбномер, Прайспоставщикнаим, Номердоговора, Заказчик, ГруппаСостояние, Адресразмещения, ФИОпользователяподразделение, Техническиеатребуты)VALUES (${str})`;
+  var sql = `INSERT INTO ${req.session.userdata.OtdelName} (ПоззаявкиСП, НомерзаявкиСП, Материал, КрТекстМатериала, Единицаизмерения, КолвозаявкаСП, ЦенабезНДС, СтоимбезНДС, Годзаявкампании, Статус, Датапоставки, Срокдоставкидн, ДатасогласованиязаявкаСП, ЗаявкаСПОписание, Taбномер, Прайспоставщикнаим, Номердоговора, Заказчик, ГруппаСостояние, Адресразмещения, ФИОпользователяподразделение, Техническиеатребуты)VALUES (${str})`;
   con.query(sql,function (err, result) {
     if (err) throw err;
     console.log("Number of records inserted: " + result.affectedRows);
@@ -137,8 +149,7 @@ server.post('/add-data', (req, res) => {
 
 server.post('/change-data', (req, res) => {
   for(let i = 0; i < req.body.datas.length; i++) {
-
-    con.query(`UPDATE uchettable SET ${req.body.datas[i].tdClass} = '${req.body.datas[i].spanText}' WHERE id=${req.body.datas[i].tdId}`, (err) => {
+    con.query(`UPDATE ${req.session.userdata.OtdelName} SET ${req.body.datas[i].tdClass} = '${req.body.datas[i].spanText}' WHERE id=${req.body.datas[i].tdId}`, (err) => {
       if (err) {
         throw err
       } else{
@@ -147,6 +158,5 @@ server.post('/change-data', (req, res) => {
   }
   res.send('успех')
 })
-
 // server.set('10.221.75.57', '10.221.75.93')
 server.listen(port, () => console.log('Server start on: ' + port))

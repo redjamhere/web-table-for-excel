@@ -1,6 +1,3 @@
-$.ajax({
-  url: 'http://loclhost:5000/check-users',
-})
 function createTable (result) {
           // insert rows in table
           for (let i = 0; i < result.length; i++){
@@ -44,6 +41,16 @@ $(document).ready(() => {
         $('.tablewarp').hide()
       } else {
         createTable(result)
+      }
+    }
+  })
+
+  $.ajax({
+    url: 'http://localhost:5000/table-list',
+    type: 'get',
+    success: (result) => {
+      for(let i = 0; i< result.length; i++) {
+        $('#selectGroup').append(`<option value="${i}">${result[i]}</option>`)
       }
     }
   })
@@ -265,6 +272,16 @@ $(document).ready(() => {
   }
   $('#n-search').keyup(function() {
     tableSearch()
+  })
+
+  $('.logout').click(() => {
+    $.ajax({
+      url: "http://localhost:5000/logout",
+      type: "post",
+      success: () => {
+        window.open('/', '_self')
+      }
+    })
   })
 
 })

@@ -1,25 +1,25 @@
-
 $(document).ready(() => {
   $.ajax({
-    url: 'http://loclhost:5000/check-users',
+    url: 'http://localhost:5000/get-cookie',
+    type: 'post',
+    success: function(result) {
+      console.log(result)
+    }
   })
   $('#l-btn').click(() => {
    $.ajax({
      url: 'http://localhost:5000/login',
      type: 'post',
      data : {
-       username: 'admin1',
-       password: 'admin1'
+       username: $('#login').val(),
+       password: $('#password').val()
      },
-     success: () => {
+     success: (result) => {
+       if(result.length > 200) {
+         window.open('http://localhost:5000/', '_self')
+       } else {
+       }
      }
    })
-    $.ajax({
-      url: 'http://localhost:5000/check-users',
-      type: 'get',
-      success: function(){
-        console.log('loggined')
-      }
-    })
   })
 })
