@@ -25,6 +25,21 @@ function createTable (result) {
           }
 }
 
+function getTable() {
+  $.ajax({
+    url: 'http://10.221.75.105:5000/get-table',
+    type: 'post',
+    success: (result) => {
+      if (result == 'No rows') {
+        $('.no-rows').show()
+        $('.tablewarp').hide()
+      } else {
+        createTable(result)
+      }
+    }
+  })
+}
+
 $(document).ready(() => {
   $('.no-rows').hide()
   $('.w-modal').hide()
@@ -33,8 +48,8 @@ $(document).ready(() => {
   $('.n-undo').hide()
   // get data for table
   $.ajax({
-    url: 'http://localhost:5000/get-table',
-    type: 'get',
+    url: 'http://10.221.75.105:5000/get-table',
+    type: 'post',
     success: (result) => {
       if (result == 'No rows') {
         $('.no-rows').show()
@@ -46,14 +61,28 @@ $(document).ready(() => {
   })
 
   $.ajax({
-    url: 'http://localhost:5000/table-list',
+    url: 'http://10.221.75.105:5000/table-list',
     type: 'get',
     success: (result) => {
       for(let i = 0; i< result.length; i++) {
-        $('#selectGroup').append(`<option value="${i}">${result[i]}</option>`)
+        $('#selectGroup').append(`<option value="${i}">${result[i].OtdelFullName}</option>`)
       }
     }
   })
+
+  $.ajax({
+    url: 'http://10.221.75.105:5000/get-cookie',
+    type: 'post',
+    success: (result) => {
+      if (result.userdata.readwrite == '0') {
+        $('.n-add').text("Только чтение")
+        $('.n-add').attr('disabled', true)
+        $('.upex').attr('disabled', true)
+        $('.n-add').css('background-color', 'red')
+      }
+    }
+  })
+  
 
   // change data in table
 
@@ -69,55 +98,65 @@ $(document).ready(() => {
     return tmp;
   }
 
+
+
   $("tbody").on('click', 'td', function (event) {
-
-    $('tbody span').show()
-    $('tbody textarea').hide()
-
-    var span = $($(event.currentTarget).children()[0])
-    var input = $($(event.currentTarget).children()[1])
-
-    span.hide()
-    input.show()
-    
-    $this = this
-
-    input.change(function () {
-      var oldText = span.text()
-      span.text($(this).val())
-      $('tbody span').show()
-      $('tbody textarea').hide()
-
-      obj = {
-        'tdId': $($this).attr('id'),
-        'tdClass': $($this).attr('class'),
-        'textArea': $($($this).children()[1]).attr('id'),
-        'span': $($($this).children()[0]).attr('id'),
-        'spanText': span.text(),
-        'oldText': oldText
-      }
-
-      arr.push(JSON.stringify(obj))
-
-      $('.n-save').show()
-      $('.n-undo').show()
-    })
-
-    input.click((event) => {
-      event.stopPropagation()
-    })
-
-    $("body").click(function(event){
-      if(event.target.nodeName != 'SPAN' && event.target.nodeName != 'TD' && event.target.nodeName != 'TEXTAREA') {
-        $($($this).children()[0]).show()
-        $($($this).children()[1]).hide()
-      }
-    })
-  
-    $(document).keyup(function(e) {
-      if (e.keyCode === 27) {
-        $($($this).children()[0]).show()
-        $($($this).children()[1]).hide()
+    $.ajax({
+      url: 'http://10.221.75.105:5000/get-cookie',
+      type: 'post',
+      success: (result) => {
+        if(result.userdata.readwrite == '1') {
+          $('tbody span').show()
+          $('tbody textarea').hide()
+      
+          var span = $($(event.currentTarget).children()[0])
+          var input = $($(event.currentTarget).children()[1])
+      
+          span.hide()
+          input.show()
+          
+          $this = this
+      
+          input.change(function () {
+            var oldText = span.text()
+            span.text($(this).val())
+            $('tbody span').show()
+            $('tbody textarea').hide()
+      
+            obj = {
+              'tdId': $($this).attr('id'),
+              'tdClass': $($this).attr('class'),
+              'textArea': $($($this).children()[1]).attr('id'),
+              'span': $($($this).children()[0]).attr('id'),
+              'spanText': span.text(),
+              'oldText': oldText
+            }
+      
+      
+            arr.push(JSON.stringify(obj))
+      
+            $('.n-save').show()
+            $('.n-undo').show()
+          })
+      
+          input.click((event) => {
+            event.stopPropagation()
+          })
+      
+          $("body").click(function(event){
+            if(event.target.nodeName != 'SPAN' && event.target.nodeName != 'TD' && event.target.nodeName != 'TEXTAREA') {
+              $($($this).children()[0]).show()
+              $($($this).children()[1]).hide()
+            }
+          })
+        
+          $(document).keyup(function(e) {
+            if (e.keyCode === 27) {
+              $($($this).children()[0]).show()
+              $($($this).children()[1]).hide()
+            }
+          })
+        }
       }
     })
   })
@@ -131,12 +170,15 @@ $(document).ready(() => {
       }
         
       $.ajax({
-        url: 'http://localhost:5000/change-data',
+        url: 'http://10.221.75.105:5000/change-data',
         type: 'post',
         data: {
           datas: tmp,
         },
         success: (result) => {
+          arr = []
+          $('.n-save').hide()
+          $('.n-undo').hide()
           alert('Изменения успешно сохранены')
         }
       })
@@ -161,9 +203,9 @@ $(document).ready(() => {
 
   })  
   
-  $('.n-add').click(() => {   
+  $('.n-add').click(() => {
     $.ajax({
-      url: 'http://localhost:5000/add-data',
+      url: 'http://10.221.75.105:5000/add-data',
       type: 'post',
       success: (result) => {
         $('tbody > tr').remove()
@@ -171,7 +213,7 @@ $(document).ready(() => {
     })
     $.ajax({
       url: 'http://localhost:5000/get-table',
-      type: 'get',
+      type: 'post',
       success: (result) => {
         if (result == 'No rows') {
           $('.no-rows').show()
@@ -200,7 +242,7 @@ $(document).ready(() => {
 
     function getResponse(data) {
       return  $.ajax({
-        url: 'http://localhost:5000/fileupload',
+        url: 'http://10.221.75.105:5000/fileupload',
         type: 'post',
         data: data,
         cache: false,
@@ -213,8 +255,8 @@ $(document).ready(() => {
     var status = getResponse(data).responseText
     if(status == 'ok') {
       $.ajax({
-        url: 'http://localhost:5000/get-table',
-        type: 'get',
+        url: 'http://10.221.75.105:5000/get-table',
+        type: 'post',
         success: (result) => {
             $('tbody tr').remove()
             createTable(result)
@@ -274,9 +316,39 @@ $(document).ready(() => {
     tableSearch()
   })
 
+  $('#selectGroup').on('change', () => {
+    tmp = []
+    $.ajax({
+      url: 'http://10.221.75.105:5000/change-table',
+      type: 'post',
+      data: {
+        tableName: $("#selectGroup option:selected" ).text()
+      },
+      success: (result) => {
+        $.ajax({
+          url: 'http://10.221.75.105:5000/get-table',
+          data: {
+            tableId : result
+          },
+          type: 'post',
+          success: (result) => {
+            if (result == 'No rows') {
+              $('.no-rows').show()
+              $('.tablewarp').hide()
+            } else {
+              $('tbody tr').remove()
+              createTable(result)
+              $('#welcom-span').text(`Таблица: ${$("#selectGroup option:selected" ).text()}`)
+            }
+          }
+        })
+      }
+    })
+  })
+
   $('.logout').click(() => {
     $.ajax({
-      url: "http://localhost:5000/logout",
+      url: "http://10.221.75.105:5000/logout",
       type: "post",
       success: () => {
         window.open('/', '_self')

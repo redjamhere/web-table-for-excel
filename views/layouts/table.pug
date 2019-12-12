@@ -29,27 +29,24 @@
       div(class="n-btn-wrap")
         li(id="n-item1" class="n-li")
           button(id="n-btn uploadExcel" class="btn btn-success upex") <i class="fas fa-upload"></i> Выгрузить из Excel
-        li(id="n-item2" class="n-li")
-          button(id="n-btn downloadExcel" class="btn btn-warning") <i class="fas fa-download"></i> Загрузить в Excel
         li(id="n-item3" class="n-li")
           .input-group
             .input-group-prepend
-              label.input-group-text(for='inputGroupSelect01') Загруженные
+              label.input-group-text(for='inputGroupSelect01') Службы
             select#selectGroup.custom-select
-              option(selected='') Выберите таблицу
-              option(value='1') One
-              option(value='2') Two
-              option(value='3') Three
-      div(class="n-btn-wrap")
+              option(selected='' disabled) Выберите таблицу
         li(id="n-item4" class="n-li")
-          button(style="" id="n-btn" class="btn n-add ") <i class="fas fa-plus"></i> Добавить
+          span(id="welcom-span")
+      div(class="n-btn-wrap")
         li(id="n-item5" class="n-li")
-          button(style="" id="n-btn" class="btn n-undo btn-info") <i class="fas fa-arrow-left"></i> Отменить изменение
+          button(style="" id="n-btn" class="btn n-add ") <i class="fas fa-plus"></i> Добавить
         li(id="n-item6" class="n-li")
-          button(style="" id="n-btn" class="btn n-save btn-primary") <i class="fas fa-save"></i> Сохранить
+          button(style="" id="n-btn" class="btn n-undo btn-info") <i class="fas fa-arrow-left"></i> Отменить изменение
         li(id="n-item7" class="n-li")
-          input(type="text" id="n-search" class="form-control n-inp" placeholder="Поиск...")
+          button(style="" id="n-btn" class="btn n-save btn-primary") <i class="fas fa-save"></i> Сохранить
         li(id="n-item8" class="n-li")
+          input(type="text" id="n-search" class="form-control n-inp" placeholder="Поиск...")
+        li(id="n-item9" class="n-li")
           button(type="button" id="n-search" class="btn btn-light logout") Выход
 
 

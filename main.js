@@ -10,6 +10,9 @@ const TokenGenerator = require('uuid-token-generator')
 
 var server = express()
 
+
+//Middleware
+
 //create connection to mysql
 const con = db.createConnection()
 
@@ -27,7 +30,8 @@ server.use(function(req, res, next) {
 
 server.use(session({
 	secret: 'secret',
-	resave: true,
+  resave: true,
+  maxAge: 1000 * 60 * 60,
 	saveUninitialized: true
 }));
 
@@ -53,6 +57,8 @@ server.get('/', (req, res) => {
 	res.end();
 })
 
+
+// authenticate
 server.post('/login', function(request, response) {
 	var username = request.body.username;
 	var password = request.body.password;
@@ -61,8 +67,8 @@ server.post('/login', function(request, response) {
 			if (results.length > 0) {
 				request.session.loggedin = true;
         request.session.userdata = results[0]
-        request.session.table = results[0].Permission
-        response.redirect('/');
+        request.session.table = results[0].OtdelNum
+        response.redirect('/')
 			} else {
 				response.send('Incorrect Username and/or Password!');
 			}			
@@ -81,6 +87,8 @@ server.post('/logout', (req,res) => {
 })
 
 //table requests
+
+//uppload excel
 server.post('/fileupload', (req, res) => {
     if (!req.files || Object.keys(req.files).length === 0) {
       return res.send('Нет файла');
@@ -94,41 +102,43 @@ server.post('/fileupload', (req, res) => {
     excelFile.mv('./public/excelImports/' + excelFile.name, function(err) {
       if (err)
         return res.send('Неверный формат');
-      var sheets = funcs.excelToDB('./public/excelImports/' + excelFile.name)
-      var sql = `INSERT INTO ${req.session.userdata.OtdelName} (ПоззаявкиСП, НомерзаявкиСП, Материал, КрТекстМатериала, Единицаизмерения, КолвозаявкаСП, ЦенабезНДС, СтоимбезНДС, Годзаявкампании, Статус, Датапоставки, Срокдоставкидн, ДатасогласованиязаявкаСП, ЗаявкаСПОписание, Taбномер, Прайспоставщикнаим, Номердоговора, Заказчик, ГруппаСостояние, Адресразмещения, ФИОпользователяподразделение, Техническиеатребуты)VALUES ?`;
-      con.query(sql, [sheets], function (err, result) {
-        if (err) throw err;
-        console.log("Number of records inserted: " + result.affectedRows);
-      });
-      res.send('ok')
+
+      con.query(`call getUserTable(${parseInt(req.session.table)})`, (err, result) => {
+
+        if (err) console.log(err)
+
+        var sheets = funcs.excelToDB('./public/excelImports/' + excelFile.name)
+        var sql = `INSERT INTO ${result[0][0].OtdelSmallName} (ПоззаявкиСП, НомерзаявкиСП, Материал, КрТекстМатериала, Единицаизмерения, КолвозаявкаСП, ЦенабезНДС, СтоимбезНДС, Годзаявкампании, Статус, Датапоставки, Срокдоставкидн, ДатасогласованиязаявкаСП, ЗаявкаСПОписание, Taбномер, Прайспоставщикнаим, Номердоговора, Заказчик, ГруппаСостояние, Адресразмещения, ФИОпользователяподразделение, Техническиеатребуты)VALUES ?`;
+        con.query(sql, [sheets], function (err, result) {
+          if (err) throw err;
+          console.log("Number of records inserted: " + result.affectedRows);
+        });
+
+        res.send('ok')
+      })
     });
 }) 
 
 
 //gettable
-server.get('/get-table', (req, res) => {
-  console.log(req.session)
-  con.query(`select OtdelSmallName from otdeli where id = ${parseInt(req.session.userdata.OtdelNum)}`,(err, result, fields) => {
-    console.log(result[0].OtdelSmallName)
-    con.query(`select * from ${result[0].OtdelSmallName}`, (err, result, fields) => {
+server.post('/get-table', (req, res) => {
+  if(req.body.tableId > 0) {
+    req.session.table = req.body.tableId
+  }
+  con.query(`call getUserTable(${req.session.table})`,(err, result) => {
+    con.query(`SELECT * FROM ${result[0][0].OtdelSmallName}`, (err, result) => {
       res.send(result)
     })
   })
 })
 
 server.get('/table-list', (req, res) => {
-  con.query(`SELECT Permission FROM users`, (err, result, fields) => {
-    let pers = []
-    for(let i = 0; i < result.length; i++) {
-      if(parseInt(req.session.userdata.Permission) <= parseInt(result[i].Permission)) {
-        pers.push(result[i].Permission)
-      }
-    }
-    res.send(pers)
+  con.query(`SELECT OtdelFullName FROM otdeli WHERE Permission >= ${req.session.userdata.Permission}`, (err, result) => {
+    res.send(result)
   })
-
 })
 
+//add new row to table
 server.post('/add-data', (req, res) => {
   var str = ''
   for (let i = 0; i < 22; i++) {
@@ -138,25 +148,42 @@ server.post('/add-data', (req, res) => {
       str +=  "'_',"
     }
   }
-  console.log(str)
-  var sql = `INSERT INTO ${req.session.userdata.OtdelName} (ПоззаявкиСП, НомерзаявкиСП, Материал, КрТекстМатериала, Единицаизмерения, КолвозаявкаСП, ЦенабезНДС, СтоимбезНДС, Годзаявкампании, Статус, Датапоставки, Срокдоставкидн, ДатасогласованиязаявкаСП, ЗаявкаСПОписание, Taбномер, Прайспоставщикнаим, Номердоговора, Заказчик, ГруппаСостояние, Адресразмещения, ФИОпользователяподразделение, Техническиеатребуты)VALUES (${str})`;
-  con.query(sql,function (err, result) {
-    if (err) throw err;
-    console.log("Number of records inserted: " + result.affectedRows);
-  });
-  res.send('ok')
+  con.query(`CALL getUserTable(${req.session.table})`, (err, result) => {
+    var sql = `INSERT INTO ${result[0][0].OtdelSmallName} (ПоззаявкиСП, НомерзаявкиСП, Материал, КрТекстМатериала, Единицаизмерения, КолвозаявкаСП, ЦенабезНДС, СтоимбезНДС, Годзаявкампании, Статус, Датапоставки, Срокдоставкидн, ДатасогласованиязаявкаСП, ЗаявкаСПОписание, Taбномер, Прайспоставщикнаим, Номердоговора, Заказчик, ГруппаСостояние, Адресразмещения, ФИОпользователяподразделение, Техническиеатребуты)VALUES (${str})`;
+    con.query(sql,function (err, result) {
+      if (err) throw err;
+      console.log("Number of records inserted: " + result.affectedRows);
+    });
+    res.send(red.session.table)
+  })
 })
 
+// change item in row
+
 server.post('/change-data', (req, res) => {
+  console.log(req.session.table)
   for(let i = 0; i < req.body.datas.length; i++) {
-    con.query(`UPDATE ${req.session.userdata.OtdelName} SET ${req.body.datas[i].tdClass} = '${req.body.datas[i].spanText}' WHERE id=${req.body.datas[i].tdId}`, (err) => {
-      if (err) {
-        throw err
-      } else{
-      }
+    con.query(`CALL getUserTable(${req.session.table})`, (err, result) => {
+      con.query(`UPDATE ${result[0][0].OtdelSmallName} SET ${req.body.datas[i].tdClass} = '${req.body.datas[i].spanText}' WHERE id=${req.body.datas[i].tdId}`, (err) => {
+        if (err) {
+          console.log(err)
+        } else{
+
+        }
+      })
     })
   }
-  res.send('успех')
+  res.send()
+})
+
+server.post('/change-table', (req, res) => {
+  con.query(`SELECT id FROM otdeli WHERE OtdelFullName = '${req.body.tableName}'`, (err, result) => {
+    res.send(result[0].id + '')
+  })
+})
+
+server.post('/get-cookie', (req, res) => {
+  res.send(req.session)
 })
 // server.set('10.221.75.57', '10.221.75.93')
 server.listen(port, () => console.log('Server start on: ' + port))

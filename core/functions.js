@@ -1,4 +1,6 @@
 const etj = require('convert-excel-to-json')
+const db = require('../config/db')
+
 module.exports = {
   formatDate(date) {
 
@@ -38,5 +40,11 @@ module.exports = {
       sheets.push(arr)
     }
     return sheets 
+  },
+  getSmallTableName(tableNum) {
+    let con = db.createConnection()
+    return con.query('select OtdelSmallName from otdeli where id = ?', [tableNum], (err, result) => {
+      return result[0].OtdelSmallName
+    })
   }
 }
