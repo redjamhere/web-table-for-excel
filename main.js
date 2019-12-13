@@ -2,7 +2,7 @@ const express = require('express')
 const session = require('express-session')
 const bodyParser  = require('body-parser')
 const exFile = require('express-fileupload')
-const port = 5000
+const port = 80
 const funcs = require('./core/functions')
 const fs = require('fs')
 const db = require('./config/db')
@@ -133,8 +133,10 @@ server.post('/get-table', (req, res) => {
 })
 
 server.get('/table-list', (req, res) => {
-  con.query(`SELECT OtdelFullName FROM otdeli WHERE Permission >= ${req.session.userdata.Permission}`, (err, result) => {
-    res.send(result)
+  con.query(`SELECT id, OtdelFullName FROM otdeli WHERE Permission >= ${req.session.userdata.Permission}`, (err, result) => {
+    res.send({
+      data: result,
+      first: req.session.userdata.OtdelNum})
   })
 })
 
@@ -154,7 +156,7 @@ server.post('/add-data', (req, res) => {
       if (err) throw err;
       console.log("Number of records inserted: " + result.affectedRows);
     });
-    res.send(red.session.table)
+    res.send(req.session.table)
   })
 })
 
@@ -178,12 +180,33 @@ server.post('/change-data', (req, res) => {
 
 server.post('/change-table', (req, res) => {
   con.query(`SELECT id FROM otdeli WHERE OtdelFullName = '${req.body.tableName}'`, (err, result) => {
-    res.send(result[0].id + '')
+    res.send(
+      {
+      id: result[0].id + '',
+      name: req.body.tableName
+      }
+    )
   })
 })
 
-server.post('/get-cookie', (req, res) => {
-  res.send(req.session)
+server.post('/delete-row', (req, res) => {
+  con.query(`call getUserTable(${req.session.table})`, (err, result) => {
+    let rows = req.body.datas
+    console.log(rows)
+    con.query(`DELETE FROM ${result[0][0].OtdelSmallName} WHERE id IN (?)`, [rows], (err, result) => {
+      if (err)
+        console.log(err)
+      else 
+        res.send('ok')
+    })
+  })
+})
+
+server.post('/permission', (req, res) => {
+  res.send({
+    readwrite : req.session.userdata.readwrite,
+    permission : req.session.userdata.Permission
+  })
 })
 // server.set('10.221.75.57', '10.221.75.93')
 server.listen(port, () => console.log('Server start on: ' + port))

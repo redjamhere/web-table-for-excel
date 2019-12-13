@@ -276,8 +276,6 @@ td:hover {
 }
 
 #t-tbl td {
-  min-width: 200px;
-  max-width: 400px;
   vertical-align: middle;
 }
 
@@ -351,8 +349,11 @@ x::-webkit-file-upload-button, input[type=file]:after {
   padding: 0px;
 }
 
-
 tbody textarea {
   height: 100%;
   width: 100%;
+}
+
+tbody th {
+  cursor: pointer;
 }

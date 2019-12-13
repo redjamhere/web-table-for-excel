@@ -5,8 +5,10 @@
         .l-header
           h3 Вход в систему
         .l-inputs
-            input(type="text" name="username" placeholder="Логин" class="password form-control"  id="login" required)
-            input(type="password" name="password" placeholder="Пароль" class="password form-control" id="password" required)
+          input(type="text" name="username" placeholder="Логин" class="password form-control"  id="login" autofocus )
+          input(type="password" name="password" placeholder="Пароль" class="password form-control" id="password")
         .l-buttons
           button(type="submit" class="l-btn btn btn-outline-primary" id="l-btn") Вход
+        .l-error
+          span.error Неверный логин или пароль
   include footer.pug  
