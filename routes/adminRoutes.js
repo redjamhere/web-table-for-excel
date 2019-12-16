@@ -4,24 +4,39 @@ const db = require('../config/db')
 
 const con = db.createConnection()
 
-router.get('/', (req, res) => {
+const checkSecurity = function(req, res, next) {
+  if (req.session.userdata !== undefined) {
+    let username = req.session.userdata.username
+    con.query('SELECT Permission FROM users WHERE username = ?', [username], (err, result) => {
+      if (result[0].Permission == 0) {
+        next()
+      }
+      else (
+        res.sendStatus(403)
+      )
+    })
+
+  } else {
+    res.sendStatus(403)
+  }
+}
+
+router.use(checkSecurity)
+
+router.get('/', (req, res, next) => {
   res.render('admin')
-  // if (req.session.userdata !== undefined) {
-  //   let username = req.session.userdata.username
-  //   con.query('SELECT Permission FROM users WHERE username = ?', [username], (err, result) => {
-  //     if (result[0].Permission == 0) {
-  //       res.render('admin')
-  //     }
-  //     else (
-  //       res.sendStatus(403)
-  //     )
-  //   })
-
-  // } else {
-  //   res.sendStatus(403)
-  // }
-
 })
 
+router.post('/userinfo', (req, res) => {
+  con.query('select * from users', (err, result) => {
+    res.send(result)
+  })
+})
+
+router.post('/userslist', (req, res) => {
+  con.query('select id, Lastname, Firstname, Middlename from users',(err, result) => {
+    res.send(result)
+  })
+})
 
 module.exports = router

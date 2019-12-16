@@ -29,7 +29,7 @@ server.use(function(req, res, next) {
 })
 
 server.use(session({
-	secret: 'secret',
+	secret: 'kscsqlzlz555555kscsqlzlzyamy',
   resave: true,
   maxAge: 1000 * 60 * 60,
 	saveUninitialized: true
