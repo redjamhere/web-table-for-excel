@@ -7,9 +7,9 @@ const funcs = require('./core/functions')
 const fs = require('fs')
 const db = require('./config/db')
 const TokenGenerator = require('uuid-token-generator')
+const admRout = require('./routes/adminRoutes')
 
 var server = express()
-
 
 //Middleware
 
@@ -44,6 +44,8 @@ server.use(bodyParser.urlencoded({
 server.use(express.static(__dirname + '/public'))
 server.use(express.static(__dirname + '/controllers'))
 server.use(express.static(__dirname + '/views'))
+
+server.use('/admin', admRout)
 
 server.set('view engine', 'pug')
 server.set('views', __dirname + '/views')
@@ -133,7 +135,7 @@ server.post('/get-table', (req, res) => {
 })
 
 server.get('/table-list', (req, res) => {
-  con.query(`SELECT id, OtdelFullName FROM otdeli WHERE Permission >= ${req.session.userdata.Permission}`, (err, result) => {
+  con.query(`SELECT id, OtdelFullName FROM otdeli WHERE Level >= ${req.session.userdata.Permission}`, (err, result) => {
     res.send({
       data: result,
       first: req.session.userdata.OtdelNum})

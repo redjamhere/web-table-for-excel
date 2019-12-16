@@ -94,9 +94,14 @@ $(document).ready(() => {
     }
   })
 
-
   $('.n-adm').click(() => {
-    alert('Admin is active')
+    $.ajax({
+      url: 'http://10.221.75.105/admin',
+      type: 'get',
+      success: (result) => {
+        window.open('/admin', '_self')
+      }
+    })
   })
 
   // change data in table
