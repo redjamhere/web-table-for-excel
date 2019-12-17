@@ -196,10 +196,10 @@
   display: flex;
   border-bottom: 1px dashed #bdc3c7;
   padding-bottom: 20px;
-  padding-top: 10px;
+  padding-top: 5px;
 }
 
-.input-warper:first-child{
+.editer .input-warper:first-child{
   padding-top: 0;
 }
 

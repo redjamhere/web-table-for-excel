@@ -16,9 +16,8 @@
           span(class=".arrow") 
             i(class="fas fa-sort-down")
             i(class="fas fa-sort-up")
-          
         .list
-          ul(class="list-ul users-ul wow slideInDown")
+          ul(class="list-ul users-ul")
             //- li(class="item1")
             //-   span(class="text-item" id="user-standard-info") Иванов Иван Иванович 
             //-     span(id="user-position") Руководитель чего-то 
@@ -53,15 +52,15 @@
                 h4.block-header Сервис
                 .input-cell
                   label(for="service-inp" class="service-lab") Назначить сервис
-                  select(name="service-inp" class="form-control data-inp")
+                  select(name="service-inp" id="service-inp" class="form-control data-inp")
                     option(value="1") Пример 1
                     option(value="1") Пример 2
                     option(value="1") Пример 3
               .depart-info
                 h4.block-header Отдел
                 .input-cell
-                  label(for="otdel-inp" class="otdel-lab") Назначить отдел
-                  select(name="otdel-inp" class="form-control data-inp")
+                  label(for="depart-inp" class="depart-lab") Назначить отдел
+                  select(name="depart-inp" class="form-control data-inp")
                     option(value="1") Пример 1
                     option(value="1") Пример 2
                     option(value="1") Пример 3
@@ -97,93 +96,4 @@
                   input(type="password" id="password-inp" name="password-inp" class="data-inp form-control" value="password")
             .button-warper
               button(type="button" id="saveUserSettings" class="btn btn-success") Сохранить
-    .departList
-      .dropDownBtn
-        button(type="button" id="userlist-btn" class="userlist-btn drp-btn") 
-          span(id="dropbtnName") Все сотрудники
-          span(class=".arrow") 
-            i(class="fas fa-sort-down")
-            i(class="fas fa-sort-up")
-        .list
-          ul(class="list-ul wow slideInDown")
-            li(class="item1")
-              span(class="text-item" id="user-standard-info") Иванов Иван Иванович 
-                span(id="user-position") Руководитель чего-то 
-            li(class="item2")
-              span(class="text-item" id="user-standard-info") Сидоров Сергей Сергеевич 
-                span(id="user-position") Исполнитель чего-то
-            li(class="item3")
-              span(class="text-item" id="user-standard-info") Петров Петр Петрович 
-                span(id="user-position") Приниматель чего-то
-          .editer
-            .close-warp
-              i(class="fas fa-times")
-            .input-warper
-              .userfio
-                h4.block-header ФИО
-                .input-cell
-                  label(for="lastname-inp" class="lastname-lab") Фамилия
-                  input(type="text" id="lastname-inp" name="lastname-inp" class="data-inp form-control" value="Иванов")
-                .input-cell
-                  label(for="firstname-inp" class="firstname-lab") Имя
-                  input(type="text" id="firstname-inp" name="firstname-inp" class="data-inp form-control" value="Иван")
-                .input-cell
-                  label(for="middlename-inp" class="middlename-lab") Отчество
-                  input(type="text" id="middle-inp" name="middlename-inp" class="data-inp form-control" value="Иванович")
-              .duty-info
-                h4.block-header Должность
-                .input-cell
-                  label(for="duty-inp" class="duty-lab") Назначить должность
-                  input(type="text" id="duty-inp" name="duty-inp" class="data-inp form-control" value="Должность")
-            .input-warper
-              .service-info
-                h4.block-header Сервис
-                .input-cell
-                  label(for="service-inp" class="service-lab") Назначить сервис
-                  select(name="service-inp" class="form-control data-inp")
-                    option(value="1") Пример 1
-                    option(value="1") Пример 2
-                    option(value="1") Пример 3
-              .depart-info
-                h4.block-header Отдел
-                .input-cell
-                  label(for="otdel-inp" class="otdel-lab") Назначить отдел
-                  select(name="otdel-inp" class="form-control data-inp")
-                    option(value="1") Пример 1
-                    option(value="1") Пример 2
-                    option(value="1") Пример 3
-            .input-warper
-              .view-permissions
-                h4.block-header Права просмотра
-                .input-cell
-                  label(for="servicePerm-inp" class="servicePerm-lab") Просмотр сервисов
-                  input(type="text" id="servicePerm-inp" name="servicePerm-inp" class="data-inp form-control" value="1")
-                .input-cell
-                  label(for="departPerm-inp" class="departPerm-lab") Просмотр отделов
-                  input(type="text" id="departPerm-inp" name="deaprtPerm-inp" class="data-inp form-control" value="1")
-              .rw-permission
-                h4.block-header Права редактирования
-                .input-cell
-                  label(for="rwPerm-inp" class="rwPerm-lab") Редактирование
-                  select(name="otdel-inp" class="form-control data-inp")
-                    option(value="true") Да
-                    option(value="false") Нет
-                //- .input-cell
-                //-   label(for="permissionInfo" class="perInfo-lab") Документация по разгранечению прав
-                //-   button(type="button" id="permissionInfo" class="btn btn-primary") Открыть
-            .input-warper
-              .username-login
-                h4.block-header Логин
-                .input-cell
-                  label(for="username-inp" class="username-lab") Изменить логин
-                  input(type="text" id="username-inp" name="username-inp" class="data-inp form-control" value="Username")
-              .username-password
-                h4.block-header Пароль
-                .input-cell
-                  label(for="password-inp" class="password-lab") Изменить пароль
-                  input(type="password" id="password-inp" name="password-inp" class="data-inp form-control" value="password")
-            .button-warper
-              button(type="button" id="saveUserSettings" class="btn btn-success") Сохранить    
-
-
       

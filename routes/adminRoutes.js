@@ -7,8 +7,8 @@ const con = db.createConnection()
 const checkSecurity = function(req, res, next) {
   if (req.session.userdata !== undefined) {
     let username = req.session.userdata.username
-    con.query('SELECT Permission FROM users WHERE username = ?', [username], (err, result) => {
-      if (result[0].Permission == 0) {
+    con.query('SELECT * FROM users WHERE username = ?', [username], (err, result) => {
+      if (result[0].username == 'admin') {
         next()
       }
       else (
@@ -27,14 +27,26 @@ router.get('/', (req, res, next) => {
   res.render('admin')
 })
 
-router.post('/userinfo', (req, res) => {
+router.post('/users', (req, res) => {
   con.query('select * from users', (err, result) => {
     res.send(result)
   })
 })
 
+router.post('/services', (req, res) => {
+  con.query('select * from services', (err, result) => {
+    res.send(result)
+  })
+})
+
+router.post('/departs', (req, res) => {
+  con.query('select * from otdeli', (err, result) => {
+    res.send(result)
+  })
+})
+
 router.post('/userslist', (req, res) => {
-  con.query('select id, Lastname, Firstname, Middlename from users',(err, result) => {
+  con.query('select id, Lastname, Firstname, Middlename, duty from users',(err, result) => {
     res.send(result)
   })
 })

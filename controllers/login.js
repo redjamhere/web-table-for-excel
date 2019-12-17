@@ -11,7 +11,7 @@ $(document).ready(() => {
   
   function ajaxLogin() {
     $.ajax({
-      url: 'http://10.221.75.105/login',
+      url: 'http://10.221.75.105/login/login',
       type: 'post',
       data : {
         username: $('#login').val(),
