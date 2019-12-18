@@ -11,7 +11,21 @@ const secureAuth = (req, res, next) => {
   } else next()
 }
 
-router.use(secureAuth)
+// router.use(secureAuth)
+
+//prepare sql querys
+
+const database = db.getDB()
+
+const querys = {
+  getUserDepart: (table, id) => {
+    return `SELECT * FROM ${table}_departs WHERE id = ${id}`
+  },
+  getInventData: (table) => {
+    return `SELECT * FROM ${table}`
+  }
+}
+
 
 router.get('/', (req, res) => {
   res.render('index')
@@ -48,20 +62,43 @@ router.post('/fileupload', (req, res) => {
 }) 
 
 //gettable
+//select table with inventar data
 router.post('/get-table', (req, res) => {
-  con.query(`call getUserTable(${req.session.table})`,(err, result) => {
-    con.query(`SELECT * FROM ${result[0][0].OtdelSmallName}`, (err, result) => {
-      res.send(result)
+
+  console.log(db.getDB())
+
+  const userdata = req.session.userdata
+
+  con.query(`CALL getUserService(${userdata.ServiceNum})`, (err, result) => {
+
+    if (err) res.send('Ошибка Базы данных. Обратитесь к администратору!')
+
+    con.query(querys.getUserDepart(result[0][0].ShortName, userdata.DepartNum), (err, result) => {
+
+      if (err) res.send('Ошибка Базы данных. Обратитесь к администратору!')
+
+      con.query(querys.getInventData(result[0].DepartShortName), (err, result) => {
+
+        if (err) res.send('Ошибка Базы данных. Обратитесь к администратору!')
+        
+        res.send(result)
+      })
     })
   })
+
+  // con.query(`call getUserTable(${req.session.table})`,(err, result) => {
+  //   con.query(`SELECT * FROM ${result[0][0].OtdelSmallName}`, (err, result) => {
+  //     res.send(result)
+  //   })
+  // })
 })
 
 router.get('/table-list', (req, res) => {
-con.query(`SELECT id, OtdelFullName FROM otdeli WHERE Level >= ${req.session.userdata.Permission}`, (err, result) => {
-  res.send({
-    data: result,
-    first: req.session.userdata.OtdelNum})
-})
+  con.query(`SELECT id, OtdelFullName FROM otdeli WHERE Level >= ${req.session.userdata.Permission}`, (err, result) => {
+    res.send({
+      data: result,
+      first: req.session.userdata.OtdelNum})
+  })
 })
 
 //add new row to table
@@ -103,34 +140,70 @@ router.post('/change-data', (req, res) => {
 })
 
 router.post('/change-table', (req, res) => {
-con.query(`SELECT id FROM otdeli WHERE OtdelFullName = '${req.body.tableName}'`, (err, result) => {
-  res.send(
-    {
-    id: result[0].id + '',
-    name: req.body.tableName
-    }
-  )
-})
+  con.query(`SELECT id FROM otdeli WHERE OtdelFullName = '${req.body.tableName}'`, (err, result) => {
+    res.send(
+      {
+      id: result[0].id + '',
+      name: req.body.tableName
+      }
+    )
+  })
 })
 
 router.post('/delete-row', (req, res) => {
-con.query(`call getUserTable(${req.session.table})`, (err, result) => {
-  let rows = req.body.datas
-  console.log(rows)
-  con.query(`DELETE FROM ${result[0][0].OtdelSmallName} WHERE id IN (?)`, [rows], (err, result) => {
-    if (err)
-      console.log(err)
-    else 
-      res.send('ok')
+  con.query(`call getUserTable(${req.session.table})`, (err, result) => {
+    let rows = req.body.datas
+    console.log(rows)
+    con.query(`DELETE FROM ${result[0][0].OtdelSmallName} WHERE id IN (?)`, [rows], (err, result) => {
+      if (err)
+        console.log(err)
+      else 
+        res.send('ok')
+    })
   })
-})
 })
 
 router.post('/permission', (req, res) => {
-res.send({
-  readwrite : req.session.userdata.readwrite,
-  permission : req.session.userdata.Permission
+  res.send({
+    readwrite : req.session.userdata.readwrite,
+    permission : req.session.userdata.Permission
+  })
 })
+
+router.get('/get-tree', (req, res) => {
+  let nodes = []
+
+  database.query('SELECT * FROM services')
+    .then(rows => {
+      console.log(rows)
+    })
+  
+  res.send('idiot')
+  // con.query('SELECT * FROM services', (err, result) => {
+  //   for(let i = 0; i < result.length; i++) {
+  //     const newService = {
+  //       id   : result[i].id + '',
+  //       text : result[i].FullName,
+  //       icon : 'img/wrench.png',
+  //       parent : '#',
+  //       children : true
+  //     }
+  //     nodes.push(newService)
+      
+  //     con.query(`select * from ${result[i].ShortName}_departs`, (err, result) => {
+  //       for(let j = 0; j < result.length; j++) {
+  //         const newDepart = {
+  //           id : result[j].id + '',
+  //           text : result[j].DepartFullName,
+  //           icon: 'img/table.png',
+  //           parent: result[j].Parent,
+  //           children: false
+  //         }
+  //         nodes.push(newDepart)
+  //       }
+  //     }) 
+  //   }
+  // })
 })
 
 module.exports = router

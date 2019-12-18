@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const db = require('../config/db')
 
-const con = db.createConnection()
+// const con = db.createConnection()
 
 const checkSecurity = function(req, res, next) {
   if (req.session.userdata !== undefined) {

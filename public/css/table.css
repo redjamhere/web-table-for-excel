@@ -12,8 +12,9 @@ body {
   display: grid;
   grid-template-areas:
   "nav nav nav"
-  "article article article";
+  "tree article article";
   grid-template-rows: 60px 1fr;
+  grid-template-columns: 300px 1fr;
   height: 100vh;
   overflow: hidden;
   margin: 0;
@@ -32,6 +33,11 @@ body {
 
 #nav {
   grid-area: nav;
+  background: #ecf0f1;
+}
+
+#tree {
+  grid-area: tree;
   background: #ecf0f1;
 }
 
@@ -357,3 +363,22 @@ tbody textarea {
 tbody th {
   cursor: pointer;
 }
+
+.opentreebtn {
+  display: none;
+}
+
+.tree-header {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tree-content {
+  width: 100%;
+  height: 100%;
+}
+
+
+

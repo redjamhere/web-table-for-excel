@@ -29,11 +29,6 @@
       div(class="n-btn-wrap")
         li(id="n-item1" class="n-li")
           button(id="n-btn uploadExcel" class="btn btn-success upex") <i class="fas fa-upload"></i> Выгрузить из Excel
-        li(id="n-item3" class="n-li")
-          .input-group
-            .input-group-prepend
-              label.input-group-text(for='inputGroupSelect01') Службы
-            select#selectGroup.custom-select
       div(class="n-btn-wrap")
         li(id="n-item4" class="n-li")
           button(style="" id="n-btn" class="btn n-add ") <i class="fas fa-plus"></i> Добавить
@@ -48,8 +43,14 @@
         li(id="n-item9" class="n-li")
           button(style="" id="n-btn" class="btn n-adm btn-danger") <i class="fas fa-user-secret"></i>
 
+  button(type="button" id="opentreebtn" class="opentreebtn")
+  #tree
+    .tree-header
+      h4 Навигация
+    .tree-content
 
- 
+    
+
   article(id="article")
     .tablewarp
       .table

@@ -29,7 +29,7 @@ function createTable (result) {
 
 function getTable() {
   $.ajax({
-    url: 'http://10.221.75.105/get-table',
+    url: 'http://10.221.75.105/table/get-table',
     type: 'post',
     success: (result) => {
       if (result == 'No rows') {
@@ -54,7 +54,7 @@ $(document).ready(() => {
   $('.n-adm').hide()
   // get data for table
   $.ajax({
-    url: 'http://10.221.75.105/get-table',
+    url: 'http://10.221.75.105/table/get-table',
     type: 'post',
     success: (result) => {
       if (result == 'No rows') {
@@ -422,6 +422,25 @@ $(document).ready(() => {
       }
     })
   })
+
+  //tree
+
+  $(() => {
+    $('.tree-content').jstree({
+      "plugins": ["sort", "json-data"],
+      'core' : {
+        'data' : {
+          'url' : function(node) {
+            return node.id === '#' ? 'http://10.221.75.105/table/get-tree' : 'http://10.221.75.105/table/get-tree'
+          },
+          'data': function(node) {
+            return { 'id' : node.id };
+          }
+        }
+      }
+    })
+  }).jstree()
+
 })
 
 
