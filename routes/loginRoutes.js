@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const db = require('../config/db')
 
-// const con = db.createConnection()
+const con = db.getDB()
 
 //Middleware
 
@@ -18,25 +18,26 @@ router.get('/', (req, res) => {
   res.render('auth')
 })
 
-router.post('/login', function(request, response) {
-	var username = request.body.username;
-	var password = request.body.password;
+router.post('/login', function(req, res) {
+	var username = req.body.username;
+  var password = req.body.password;
+  
 	if (username && password) {
-	  con.query('SELECT * FROM users WHERE username = ? AND password = ?', [username, password], function(error, results, fields) {
-			if (results.length > 0) {
-				request.session.loggedin = true;
-        request.session.userdata = results[0]
-        response.redirect('/')
-        console.log(request.session)
-			} else {
-				response.send('Incorrect Username and/or Password!');
-			}			
-			response.end();
-		});
-	} else {
-		response.send('Please enter Username and Password!');
-		response.end();
-	}
+    con.query('SELECT * FROM USERS WHERE username = ? AND password = ?', [username, password])
+      .then(rows => {
+        if(rows.length > 0 ) {
+          req.session.loggedin = true
+          req.session.userdata = rows[0]
+          console.log(req.session)
+          res.redirect('/')
+        } else {
+          res.send('Incorrecy Username and/or Password')
+        }
+       })
+  } else {
+    res.send('Please enter Username and Password')
+    res.end()
+  }
 });
 
 router.post('/logout', (req,res) => {

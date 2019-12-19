@@ -11,11 +11,9 @@ const secureAuth = (req, res, next) => {
   } else next()
 }
 
-// router.use(secureAuth)
+router.use(secureAuth)
 
-//prepare sql querys
-
-const database = db.getDB()
+const con = db.getDB()
 
 const querys = {
   getUserDepart: (table, id) => {
@@ -65,40 +63,15 @@ router.post('/fileupload', (req, res) => {
 //select table with inventar data
 router.post('/get-table', (req, res) => {
 
-  console.log(db.getDB())
-
   const userdata = req.session.userdata
 
-  con.query(`CALL getUserService(${userdata.ServiceNum})`, (err, result) => {
-
-    if (err) res.send('Ошибка Базы данных. Обратитесь к администратору!')
-
-    con.query(querys.getUserDepart(result[0][0].ShortName, userdata.DepartNum), (err, result) => {
-
-      if (err) res.send('Ошибка Базы данных. Обратитесь к администратору!')
-
-      con.query(querys.getInventData(result[0].DepartShortName), (err, result) => {
-
-        if (err) res.send('Ошибка Базы данных. Обратитесь к администратору!')
-        
-        res.send(result)
-      })
+  con.query(`SELECT * FROM ${userdata.DepartName}`)
+    .then(row => {
+      console.log(row[0])
     })
-  })
-
-  // con.query(`call getUserTable(${req.session.table})`,(err, result) => {
-  //   con.query(`SELECT * FROM ${result[0][0].OtdelSmallName}`, (err, result) => {
-  //     res.send(result)
-  //   })
-  // })
-})
-
-router.get('/table-list', (req, res) => {
-  con.query(`SELECT id, OtdelFullName FROM otdeli WHERE Level >= ${req.session.userdata.Permission}`, (err, result) => {
-    res.send({
-      data: result,
-      first: req.session.userdata.OtdelNum})
-  })
+    .catch(err => {
+      res.send('Ошибка! Обратитесь к администратору')
+    })
 })
 
 //add new row to table
@@ -170,40 +143,64 @@ router.post('/permission', (req, res) => {
   })
 })
 
-router.get('/get-tree', (req, res) => {
+router.get('/get-services', (req, res) => {
   let nodes = []
 
-  database.query('SELECT * FROM services')
+  con.query('select * from services')
     .then(rows => {
-      console.log(rows)
+      rows.forEach(s => {
+        const newService = {
+          id: s.id + '',
+          text: s.FullName,
+          icon: 'img/wrench.png',
+          parent: '#',
+          children: true
+        }
+        nodes.push(newService)
+      })
+      res.send(nodes)
     })
-  
-  res.send('idiot')
-  // con.query('SELECT * FROM services', (err, result) => {
-  //   for(let i = 0; i < result.length; i++) {
-  //     const newService = {
-  //       id   : result[i].id + '',
-  //       text : result[i].FullName,
-  //       icon : 'img/wrench.png',
-  //       parent : '#',
-  //       children : true
-  //     }
-  //     nodes.push(newService)
-      
-  //     con.query(`select * from ${result[i].ShortName}_departs`, (err, result) => {
-  //       for(let j = 0; j < result.length; j++) {
-  //         const newDepart = {
-  //           id : result[j].id + '',
-  //           text : result[j].DepartFullName,
-  //           icon: 'img/table.png',
-  //           parent: result[j].Parent,
-  //           children: false
-  //         }
-  //         nodes.push(newDepart)
-  //       }
-  //     }) 
-  //   }
-  // })
+})
+
+router.get('/get-departs', (req, res) => {
+
+  let getNodes = new Promise((resolve, reject) => {
+    let nodes = []
+    if(rows) {
+      rows.forEach(s => {
+        nodes.push(s)
+      })
+    resolve(nodes)
+    } else {
+      let err = new Error('Ошибка базы')
+      reject(err)
+    }
+  })
+
+  let query = function(){
+    con.query('select * from services')
+      .then(rows => {
+        getNodes
+          .then()
+      })
+  }
+
 })
 
 module.exports = router
+
+// for(let i = 0; i < services.length; i++) {
+//   con.query(`select * from ${services[i]}`)
+//     .then(rows => {
+//       rows.forEach(d => {
+//         const newDepart = {
+//           id: d.id + '',
+//           text: d.Fullname,
+//           icon: 'img/table.png',
+//           parent: d.Parent,
+//           children: false
+//         }
+//         departs.push(newDepart)
+//       })
+//     })
+// }

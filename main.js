@@ -22,15 +22,6 @@ const secureAuth = (req, res, next) => {
   }
 }
 
-//create connection to mysql
-// const con = db.createConnection()
-
-// con.connect(function(err){
-//   if (err) {
-//     return console.error("Ошибка: " + err.message)
-//   }
-// })
-
 server.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*") // update to match the domain you will make the request from
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")

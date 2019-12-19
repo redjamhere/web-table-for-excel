@@ -431,7 +431,7 @@ $(document).ready(() => {
       'core' : {
         'data' : {
           'url' : function(node) {
-            return node.id === '#' ? 'http://10.221.75.105/table/get-tree' : 'http://10.221.75.105/table/get-tree'
+            return node.id === '#' ? 'http://10.221.75.105/table/get-services' : 'http://10.221.75.105/table/get-departs'
           },
           'data': function(node) {
             return { 'id' : node.id };
