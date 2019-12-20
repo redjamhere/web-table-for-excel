@@ -27,6 +27,29 @@ function createTable (result) {
           }
 }
 
+function createTree (parents, childes) {
+  let p = ''
+  let c = ''
+  for(let i = 0; i < parents.length; i++) {
+    p += `<li id="${parents[i].id}" class="${parents[i].short}" type="service">${parents[i].text}`
+    if(parents[i].children) {
+      p += '<ul>'
+      for(let j = 0; j < childes.length; j++) {
+        if (childes[j].parent == parents[i].id) {
+          c += `<li id="${childes[j].id}" class="${childes[j].short}" type="depart"><img src="img/table.png"/> ${childes[j].text}</li>`
+        }
+      }
+      p += c
+      c = ''
+      p += '</ul>'
+      p += '</li>'
+    } else {
+
+    }
+  }
+  $('.treeview').append(p)
+}
+
 function getTable() {
   $.ajax({
     url: 'http://10.221.75.105/table/get-table',
@@ -52,6 +75,7 @@ $(document).ready(() => {
   $('.n-save').hide()
   $('.n-undo').hide()
   $('.n-adm').hide()
+  $('.pagewarp').css('grid-template-columns', '0px, 1fr')
   // get data for table
   $.ajax({
     url: 'http://10.221.75.105/table/get-table',
@@ -76,23 +100,25 @@ $(document).ready(() => {
     }
   })
 
-  $.ajax({
-    url: 'http://10.221.75.105/permission',
-    type: 'post',
-    success: (result) => {
-      status = result.readwrite
-      adm = result.permission
-      if (status == '0') {
-        $('.n-add').text("Только чтение")
-        $('.n-add').attr('disabled', true)
-        $('.upex').attr('disabled', true)
-        $('.n-add').css('background-color', 'red')
-      }
-      if(adm == 0) {
-        $('.n-adm').show()
-      }
-    }
-  })
+  let status = 1
+
+  // $.ajax({
+  //   url: 'http://10.221.75.105/permission',
+  //   type: 'post',
+  //   success: (result) => {
+  //     status = result.readwrite
+  //     adm = result.permission
+  //     if (status == '0') {
+  //       $('.n-add').text("Только чтение")
+  //       $('.n-add').attr('disabled', true)
+  //       $('.upex').attr('disabled', true)
+  //       $('.n-add').css('background-color', 'red')
+  //     }
+  //     if(adm == 0) {
+  //       $('.n-adm').show()
+  //     }
+  //   }
+  // })
 
   $('.n-adm').click(() => {
     $.ajax({
@@ -215,7 +241,7 @@ $(document).ready(() => {
         }
           
         $.ajax({
-          url: 'http://10.221.75.105/change-data',
+          url: 'http://10.221.75.105/table/change-data',
           type: 'post',
           data: {
             datas: tmp,
@@ -279,7 +305,7 @@ $(document).ready(() => {
   
   $('.n-add').click(() => {
     $.ajax({
-      url: 'http://10.221.75.105/add-data',
+      url: 'http://10.221.75.105/table/add-data',
       type: 'post',
       success: (result) => {
         $('tbody > tr').remove()
@@ -302,10 +328,10 @@ $(document).ready(() => {
     $.each(files, function(key, value) {
       data.append(key, value)
     })
-
+    
     function getResponse(data) {
       return  $.ajax({
-        url: 'http://10.221.75.105/fileupload',
+        url: 'http://10.221.75.105/table/fileupload',
         type: 'post',
         data: data,
         cache: false,
@@ -316,9 +342,10 @@ $(document).ready(() => {
     }
 
     var status = getResponse(data).responseText
+    console.log(status)
     if(status == 'ok') {
       $.ajax({
-        url: 'http://10.221.75.105/get-table',
+        url: 'http://10.221.75.105/table/get-table',
         type: 'post',
         success: (result) => {
             $('tbody tr').remove()
@@ -425,25 +452,52 @@ $(document).ready(() => {
 
   //tree
 
-  $(() => {
-    $('.tree-content').jstree({
-      "plugins": ["sort", "json-data"],
-      'core' : {
-        'data' : {
-          'url' : function(node) {
-            return node.id === '#' ? 'http://10.221.75.105/table/get-services' : 'http://10.221.75.105/table/get-departs'
-          },
-          'data': function(node) {
-            return { 'id' : node.id };
-          }
+  $.ajax({
+    url: 'http://10.221.75.105/table/get-services',
+    type: 'get',
+    success: (parents) => {
+      $.ajax({
+        url: 'http://10.221.75.105/table/get-departs',
+        type: 'get',
+        success: (childes) => {
+          console.log(childes)
+          createTree(parents, childes)
+          $('.treeview').treeView()
         }
-      }
-    })
-  }).jstree()
+      })
+    }
+  })
+
+  $('.treeview').on('click', 'li', function() {
+    if($(this).attr('type') == 'depart') {
+      $.ajax({
+        url: 'http://10.221.75.105/table/get-table',
+        data : {
+          openTable : $(this).attr('class')
+        },
+        type: 'post',
+        success: (result) => {
+          if (!result) alert('Недостаточно прав')
+          $('.treeview li').css('border', '0')
+          $(this).css('border-left', '1px solid black')
+          $('tbody tr').remove()
+          createTable(result)
+        }
+      })
+    }
+  })
+
+  let treeOpened = 0
+
+  $('#treeopen').click(() => {
+    if(treeOpened == 0) {
+      $('.pagewarp').css('grid-template-columns', '300px 1fr')
+      treeOpened++
+    } else {
+      $('.pagewarp').css('grid-template-columns', '0px 1fr')
+      treeOpened--
+    }
+
+  })
 
 })
-
-
-
-
-

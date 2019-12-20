@@ -13,6 +13,8 @@ const secureAuth = (req, res, next) => {
 
 router.use(secureAuth)
 
+router.use(exFile())
+
 const con = db.getDB()
 
 const querys = {
@@ -42,36 +44,47 @@ router.post('/fileupload', (req, res) => {
   excelFile.mv('./public/excelImports/' + excelFile.name, function(err) {
     if (err)
       return res.send('Неверный формат');
-
-    con.query(`call getUserTable(${parseInt(req.session.table)})`, (err, result) => {
-
-      if (err) console.log(err)
-
-      var sheets = funcs.excelToDB('./public/excelImports/' + excelFile.name)
-      var sql = `INSERT INTO ${result[0][0].OtdelSmallName} (ПоззаявкиСП, НомерзаявкиСП, Материал, КрТекстМатериала, Единицаизмерения, КолвозаявкаСП, ЦенабезНДС, СтоимбезНДС, Годзаявкампании, Статус, Датапоставки, Срокдоставкидн, ДатасогласованиязаявкаСП, ЗаявкаСПОписание, Taбномер, Прайспоставщикнаим, Номердоговора, Заказчик, ГруппаСостояние, Адресразмещения, ФИОпользователяподразделение, Техническиеатребуты)VALUES ?`;
-      con.query(sql, [sheets], function (err, result) {
-        if (err) throw err;
-        console.log("Number of records inserted: " + result.affectedRows);
-      });
-
-      res.send('ok')
-    })
+    var sheets = funcs.excelToDB('./public/excelImports/' + excelFile.name)
+    var sql = `INSERT INTO ${req.session.userdata.DepartName} (ПоззаявкиСП, НомерзаявкиСП, Материал, КрТекстМатериала, Единицаизмерения, КолвозаявкаСП, ЦенабезНДС, СтоимбезНДС, Годзаявкампании, Статус, Датапоставки, Срокдоставкидн, ДатасогласованиязаявкаСП, ЗаявкаСПОписание, Taбномер, Прайспоставщикнаим, Номердоговора, Заказчик, ГруппаСостояние, Адресразмещения, ФИОпользователяподразделение, Техническиеатребуты)VALUES ?`;
+    con.query(sql, [sheets]) 
+      .then(rows => {
+        console.log("Number of records inserted: " + rows.affectedRows);
+      })
+      .catch(err => {
+        console.log(err)
+      })
+    res.send('ok')
   });
-}) 
+});
 
 //gettable
 //select table with inventar data
 router.post('/get-table', (req, res) => {
-
-  const userdata = req.session.userdata
-
-  con.query(`SELECT * FROM ${userdata.DepartName}`)
-    .then(row => {
-      console.log(row[0])
-    })
-    .catch(err => {
-      res.send('Ошибка! Обратитесь к администратору')
-    })
+  console.log(req.session)
+  if(req.body.openTable) {
+    con.query(`select Level from service_departs where Shortname = '${req.body.openTable}'`)
+      .then(rows => {
+        if(rows[0].Level >= req.session.userdata.DepartViewPermission) {
+          con.query(`select * from ${req.body.openTable}`)
+            .then(rows => {
+              res.send(rows)
+              req.session.userdata.DepartName = req.body.openTable
+              console.log(req.session)
+              req.session.save()
+            })
+        } else {
+          res.send(false)
+        }
+      })
+  } else {
+    con.query(`select * from ${req.session.userdata.DepartName}`)
+      .then(rows => {
+        res.send(rows)
+      })
+      .catch(err => {
+        res.send(err)
+      })
+  }
 })
 
 //add new row to table
@@ -84,43 +97,29 @@ for (let i = 0; i < 22; i++) {
     str +=  "'_',"
   }
 }
-con.query(`CALL getUserTable(${req.session.table})`, (err, result) => {
-  var sql = `INSERT INTO ${result[0][0].OtdelSmallName} (ПоззаявкиСП, НомерзаявкиСП, Материал, КрТекстМатериала, Единицаизмерения, КолвозаявкаСП, ЦенабезНДС, СтоимбезНДС, Годзаявкампании, Статус, Датапоставки, Срокдоставкидн, ДатасогласованиязаявкаСП, ЗаявкаСПОписание, Taбномер, Прайспоставщикнаим, Номердоговора, Заказчик, ГруппаСостояние, Адресразмещения, ФИОпользователяподразделение, Техническиеатребуты)VALUES (${str})`;
-  con.query(sql,function (err, result) {
-    if (err) throw err;
-    console.log("Number of records inserted: " + result.affectedRows);
-  });
-  res.send(req.session.table)
-})
+  let sql = `INSERT INTO ${req.session.userdata.DepartName} (ПоззаявкиСП, НомерзаявкиСП, Материал, КрТекстМатериала, Единицаизмерения, КолвозаявкаСП, ЦенабезНДС, СтоимбезНДС, Годзаявкампании, Статус, Датапоставки, Срокдоставкидн, ДатасогласованиязаявкаСП, ЗаявкаСПОписание, Taбномер, Прайспоставщикнаим, Номердоговора, Заказчик, ГруппаСостояние, Адресразмещения, ФИОпользователяподразделение, Техническиеатребуты)VALUES (${str})`;
+  con.query(sql) 
+    .then(rows => {
+      console.log("Number of records inserted: " + rows.affectedRows);
+      res.send('ok')
+    })
+    .catch(err => {
+      res.send(err)
+    })
 })
 
 // change item in row
 
 router.post('/change-data', (req, res) => {
-  console.log(req.session.table)
   for(let i = 0; i < req.body.datas.length; i++) {
-    con.query(`CALL getUserTable(${req.session.table})`, (err, result) => {
-      con.query(`UPDATE ${result[0][0].OtdelSmallName} SET ${req.body.datas[i].tdClass} = '${req.body.datas[i].spanText}' WHERE id=${req.body.datas[i].tdId}`, (err) => {
-        if (err) {
-          console.log(err)
-        } else{
-
-        }
-      })
-    })
+      con.query(`UPDATE ${req.session.userdata.DepartName} SET ${req.body.datas[i].tdClass} = '${req.body.datas[i].spanText}' WHERE id=${req.body.datas[i].tdId}`)
+        .then(rows => {
+          res.send('ok')
+        })
+        .catch(err => {
+          res.send(err)
+        })
   }
-  res.send()
-})
-
-router.post('/change-table', (req, res) => {
-  con.query(`SELECT id FROM otdeli WHERE OtdelFullName = '${req.body.tableName}'`, (err, result) => {
-    res.send(
-      {
-      id: result[0].id + '',
-      name: req.body.tableName
-      }
-    )
-  })
 })
 
 router.post('/delete-row', (req, res) => {
@@ -150,11 +149,12 @@ router.get('/get-services', (req, res) => {
     .then(rows => {
       rows.forEach(s => {
         const newService = {
-          id: s.id + '',
+          id: s.id+'service',
           text: s.FullName,
           icon: 'img/wrench.png',
           parent: '#',
-          children: true
+          children: true,
+          short: s.ShortName
         }
         nodes.push(newService)
       })
@@ -164,43 +164,29 @@ router.get('/get-services', (req, res) => {
 
 router.get('/get-departs', (req, res) => {
 
-  let getNodes = new Promise((resolve, reject) => {
-    let nodes = []
-    if(rows) {
-      rows.forEach(s => {
-        nodes.push(s)
+  let departs =[]
+  con.query("select * from service_departs")
+    .then(_ => {
+      _.forEach(d => {
+        const newDepart = {
+          id: d.id + 'depart',
+          text: d.Fullname,
+          icon: 'img/table.png',
+          parent: d.Parent + 'service',
+          children: false,
+          short: d.Shortname
+        }
+        departs.push(newDepart)
       })
-    resolve(nodes)
-    } else {
-      let err = new Error('Ошибка базы')
-      reject(err)
-    }
-  })
-
-  let query = function(){
-    con.query('select * from services')
-      .then(rows => {
-        getNodes
-          .then()
-      })
-  }
-
+      res.send(departs)
+    })
 })
 
-module.exports = router
+setInterval(() => {
+  con.query('select 1')
+    .then(rows => {
+      console.log(rows)
+    })
+}, 20000)
 
-// for(let i = 0; i < services.length; i++) {
-//   con.query(`select * from ${services[i]}`)
-//     .then(rows => {
-//       rows.forEach(d => {
-//         const newDepart = {
-//           id: d.id + '',
-//           text: d.Fullname,
-//           icon: 'img/table.png',
-//           parent: d.Parent,
-//           children: false
-//         }
-//         departs.push(newDepart)
-//       })
-//     })
-// }
+module.exports = router

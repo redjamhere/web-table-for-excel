@@ -14,7 +14,7 @@ body {
   "nav nav nav"
   "tree article article";
   grid-template-rows: 60px 1fr;
-  grid-template-columns: 300px 1fr;
+  grid-template-columns: 0px 1fr;
   height: 100vh;
   overflow: hidden;
   margin: 0;
@@ -28,7 +28,7 @@ body {
 #article {
   grid-area: article;
   overflow: auto;
-
+  position: relative;
 }
 
 #nav {
@@ -38,7 +38,9 @@ body {
 
 #tree {
   grid-area: tree;
-  background: #ecf0f1;
+  background : #ecf0f1;
+  overflow: hidden;
+  transition: .2s;
 }
 
 thead {
@@ -380,5 +382,17 @@ tbody th {
   height: 100%;
 }
 
+.treeview li[type = 'depart'] {
+  display: flex;
+  align-items: center;
+}
 
-
+.treeopen {
+  -webkit-writing-mode: vertical-rl; writing-mode:tb-rl;
+  position: absolute;
+  width: 30px;
+  height: 100px;
+  background-color: white;
+  text-align: center;
+  cursor: pointer;
+}

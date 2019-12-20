@@ -25,10 +25,9 @@ router.post('/login', function(req, res) {
 	if (username && password) {
     con.query('SELECT * FROM USERS WHERE username = ? AND password = ?', [username, password])
       .then(rows => {
-        if(rows.length > 0 ) {
+        if(rows.length > 0) {
           req.session.loggedin = true
           req.session.userdata = rows[0]
-          console.log(req.session)
           res.redirect('/')
         } else {
           res.send('Incorrecy Username and/or Password')
