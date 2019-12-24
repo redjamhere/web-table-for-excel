@@ -1,7 +1,6 @@
 const express = require('express')
 const router = express.Router()
 const db = require('../config/db')
-
 const con = db.getDB()
 
 //Middleware
@@ -19,8 +18,8 @@ router.get('/', (req, res) => {
 })
 
 router.post('/login', function(req, res) {
-	var username = req.body.username;
-  var password = req.body.password;
+	var username = req.body.username
+  var password = req.body.password
   
 	if (username && password) {
     con.query('SELECT * FROM USERS WHERE username = ? AND password = ?', [username, password])
@@ -38,7 +37,6 @@ router.post('/login', function(req, res) {
     res.end()
   }
 });
-
 router.post('/logout', (req,res) => {
   console.log(req.session)
   req.session.destroy()

@@ -38,9 +38,10 @@ body {
 
 #tree {
   grid-area: tree;
-  background : #ecf0f1;
+  background : #3c6382;
   overflow: hidden;
   transition: .2s;
+  border-top: 1px dashed #bdc3c7;
 }
 
 thead {
@@ -52,9 +53,6 @@ thead {
 td {
   cursor: pointer;
   transition: .2s ease;
-}
-
-td span {
 }
 
 td textarea {
@@ -127,18 +125,8 @@ td:hover {
    width: 100%
   }
 
-
-.w-modal {
-  position: fixed; 
-  width: 100vw;
-  height: 100vh;
-  background: rgba(44, 62, 80, .8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .w-modal-file {
+  z-index: 999;
   position: fixed; 
   width: 100vw;
   height: 100vh;
@@ -211,7 +199,7 @@ td:hover {
 }
 
   .mf-header h2 {
-    color: #34495e;
+    color: rgb(52, 73, 94);
   }
 
 .mf-form {
@@ -375,6 +363,7 @@ tbody th {
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #ecf0f1;
 }
 
 .tree-content {
@@ -385,14 +374,49 @@ tbody th {
 .treeview li[type = 'depart'] {
   display: flex;
   align-items: center;
+  color: #ecf0f1;
 }
 
+.treeview li[type = 'service'] {
+  border-bottom: 1px solid #34495e;
+  color: #ecf0f1;
+  padding-right: 10px;
+}
+
+/*.treeview li {
+  transition: .2s;
+}
+
+.treeview li:hover {
+  background: rgba(0,0,0, .3);
+}*/
+
 .treeopen {
-  -webkit-writing-mode: vertical-rl; writing-mode:tb-rl;
-  position: absolute;
+  position: fixed;
   width: 30px;
-  height: 100px;
-  background-color: white;
+  height: 68px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, .8);
+  color: rgba(0,0,0, .7);
   text-align: center;
+  cursor: pointer;
+  font-size: 20px;
+  transition: .2s;
+}
+
+.treeopen:hover {
+  background: white;
+  color: black;
+}
+
+.admin-warp{
+  text-align: center;
+}
+
+#adminbtn {
+  color: #e74c3c;
+  border-bottom: 1px solid #e74c3c;
   cursor: pointer;
 }

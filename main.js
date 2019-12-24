@@ -1,3 +1,6 @@
+const forever = require('forever-monitor')
+const child = new (forever.Monitor)('main.js')
+
 const express = require('express')
 const session = require('express-session')
 const bodyParser  = require('body-parser')

@@ -27,16 +27,19 @@ function createTable (result) {
           }
 }
 
-function createTree (parents, childes) {
+function createTree (parents, childes, permissions) {
   let p = ''
   let c = ''
   for(let i = 0; i < parents.length; i++) {
-    p += `<li id="${parents[i].id}" class="${parents[i].short}" type="service">${parents[i].text}`
+    p += `<li id="${parents[i].id}" class="${parents[i].short}" type="service" level="${parents[i].level}"><i class="fas fa-receipt" style="margin-right: 20px"></i> ${parents[i].text}`
     if(parents[i].children) {
       p += '<ul>'
       for(let j = 0; j < childes.length; j++) {
         if (childes[j].parent == parents[i].id) {
-          c += `<li id="${childes[j].id}" class="${childes[j].short}" type="depart"><img src="img/table.png"/> ${childes[j].text}</li>`
+          if(permissions.departView <= childes[j].level)
+            c += `<li id="${childes[j].id}" class="${childes[j].short}" type="depart" disable="false" level="${childes[i].level}"><i class="fas fa-table" style="margin-right: 20px"></i> ${childes[j].text}</li>`
+          else
+            c += `<li id="${childes[j].id}" class="${childes[j].short}" style="color: gray;" type="depart" disable="true" level="${childes[i].level}"><i class="fas fa-table" style="margin-right: 20px"></i> ${childes[j].text}</li>`
         }
       }
       p += c
@@ -65,22 +68,52 @@ function getTable() {
   })
 }
 
-let status = false
-let adm = false
-
 $(document).ready(() => {
+
   $('.no-rows').hide()
   $('.w-modal').hide()
   $('.w-modal-file').hide()
   $('.n-save').hide()
   $('.n-undo').hide()
   $('.n-adm').hide()
+  $('#preloader').hide()
+  $('.admin-warp').hide()
+
+  let permissions
+
+  $.ajax({
+    url: 'http://10.221.75.105/table/getperm',
+    type: 'POST',
+    success: (result) => {
+      permissions = result
+      if(!permissions.readWrite) {
+        $('.n-add').css('background-color', '#c0392b')
+        $('.n-add').text('Только чтение')
+        $('.n-add').attr('disabled', 'disabled')
+        $('.upex').hide()
+      }
+      if(!permissions.departView && !permissions.serviceView) {
+        $.ajax({
+          url: 'http://10.221.75.105/table/supercheck',
+          type: 'post',
+          success: (result) => {
+            if(result) {
+              $('.admin-warp').show()
+            }
+          }
+        })
+      }
+    }
+  })
+
   $('.pagewarp').css('grid-template-columns', '0px, 1fr')
   // get data for table
   $.ajax({
     url: 'http://10.221.75.105/table/get-table',
     type: 'post',
+    beforeSend: (xhr) => { $('#preloader').show() },
     success: (result) => {
+      $('#preloader').hide()
       if (result == 'No rows') {
         $('.no-rows').show()
         $('.tablewarp').hide()
@@ -89,36 +122,6 @@ $(document).ready(() => {
       }
     }
   })
-
-  $.ajax({
-    url: 'http://10.221.75.105/table-list',
-    type: 'get',
-    success: (result) => {
-      for(let i = 0; i< result.data.length; i++) {
-        $('#selectGroup').append(`<option value="${result.data[i].id}">${result.data[i].OtdelFullName}</option>`)
-      }
-    }
-  })
-
-  let status = 1
-
-  // $.ajax({
-  //   url: 'http://10.221.75.105/permission',
-  //   type: 'post',
-  //   success: (result) => {
-  //     status = result.readwrite
-  //     adm = result.permission
-  //     if (status == '0') {
-  //       $('.n-add').text("Только чтение")
-  //       $('.n-add').attr('disabled', true)
-  //       $('.upex').attr('disabled', true)
-  //       $('.n-add').css('background-color', 'red')
-  //     }
-  //     if(adm == 0) {
-  //       $('.n-adm').show()
-  //     }
-  //   }
-  // })
 
   $('.n-adm').click(() => {
     $.ajax({
@@ -144,7 +147,7 @@ $(document).ready(() => {
   }
 
   $("tbody").on('click', 'td', function (event) {
-    if(status == '1') {
+    if(permissions.readWrite) {
       $('tbody span').show()
       $('tbody textarea').hide()
 
@@ -217,7 +220,7 @@ $(document).ready(() => {
     })
 
     $('tbody').on('click', '#delrow', function() {
-      if (status == '1') {
+      if (permissions.readWrite) {
         $(`.${localStorage['rowId']}tr`).fadeOut('fast')
         let rowId = $(`.${localStorage['rowId']}th`).parent('tr').attr('id')
         delrows.push(parseInt(rowId))
@@ -246,7 +249,9 @@ $(document).ready(() => {
           data: {
             datas: tmp,
           },
+          beforeSend: (xhr) => { $('#preloader').show() },
           success: (result) => {
+            $('#preloader').hide()
             arr = []
             $('.n-save').hide()
             $('.n-undo').hide()
@@ -256,12 +261,14 @@ $(document).ready(() => {
       }
       if (delrows.length > 0) {
         $.ajax({
-          url: 'http://10.221.75.105/delete-row',
+          url: 'http://10.221.75.105/table/delete-row',
           type: 'post',
           data: {
             datas: delrows,
           },
+          beforeSend: (xhr) => { $('#preloader').show() },
           success: (result) => {
+            $('#preloader').hide()
             delrows = []
             $('.n-save').hide()
             $('.n-undo').hide()
@@ -304,14 +311,38 @@ $(document).ready(() => {
   })  
   
   $('.n-add').click(() => {
-    $.ajax({
-      url: 'http://10.221.75.105/table/add-data',
-      type: 'post',
-      success: (result) => {
-        $('tbody > tr').remove()
-        getTable()
-      }
-    })
+    if(permissions.readWrite) {
+      $.ajax({
+        url: 'http://10.221.75.105/table/add-data',
+        type: 'post',
+        success: (result) => {
+            if(arr.length > 0) {
+              arr = getUnique(arr)
+              tmp = []
+              for (let i = 0; i < arr.length; i++) {
+                tmp.push(JSON.parse(arr[i]))
+              }
+                
+              $.ajax({
+                url: 'http://10.221.75.105/table/change-data',
+                type: 'post',
+                data: {
+                  datas: tmp,
+                },
+                success: (result) => {
+                  arr = []
+                  $('.n-save').hide()
+                  $('.n-undo').hide()
+                  $('tbody > tr').remove()
+                  getTable()
+                }
+              })
+            }
+          $('tbody > tr').remove()
+          getTable()
+        }
+      })
+    }
   })
 // requset upladExcel
 
@@ -321,42 +352,47 @@ $(document).ready(() => {
   })
 
   $('#upfile-btn').click(function(event) {
-    event.stopPropagation()    
-    event.preventDefault()
-
-    var data = new FormData()
-    $.each(files, function(key, value) {
-      data.append(key, value)
-    })
-    
-    function getResponse(data) {
-      return  $.ajax({
-        url: 'http://10.221.75.105/table/fileupload',
-        type: 'post',
-        data: data,
-        cache: false,
-        processData: false,
-        contentType: false,
-        async: false,
+    if(permissions.readWrite) {
+      event.stopPropagation()    
+      event.preventDefault()
+  
+      var data = new FormData()
+      $.each(files, function(key, value) {
+        data.append(key, value)
       })
-    }
-
-    var status = getResponse(data).responseText
-    console.log(status)
-    if(status == 'ok') {
-      $.ajax({
-        url: 'http://10.221.75.105/table/get-table',
-        type: 'post',
-        success: (result) => {
-            $('tbody tr').remove()
-            createTable(result)
-            $('.w-modal-file').fadeOut('fast')
-          
-        }
-      })
-
+      
+      function getResponse(data) {
+        return  $.ajax({
+          url: 'http://10.221.75.105/table/fileupload',
+          type: 'post',
+          data: data,
+          cache: false,
+          processData: false,
+          contentType: false,
+          async: false,
+        })
+      }
+  
+      let response = getResponse(data).responseText
+      if(response == 'ok') {
+        $.ajax({
+          url: 'http://10.221.75.105/table/get-table',
+          type: 'post',
+          beforeSend: (xhr) => { $('#preloader').show() },
+          success: (result) => {
+              $('#preloader').hide()
+              $('tbody tr').remove()
+              createTable(result)
+              $('.w-modal-file').fadeOut('fast')
+            
+          }
+        })
+  
+      } else {
+        alert('Ошибка загрузки:' + response)
+      }
     } else {
-      alert('Ошибка загрузки:' + status)
+      alert('У тебя не получиться ты лох :с')
     }
 
   })
@@ -370,7 +406,8 @@ $(document).ready(() => {
   })
 
   $('.upex').click(() => {
-    $('.w-modal-file').fadeIn('fast')
+    if(permissions.readWrite)
+      $('.w-modal-file').fadeIn('fast')
   })
 
   $('#m-close').click(() => {
@@ -414,7 +451,9 @@ $(document).ready(() => {
       data: {
         tableName: $("#selectGroup option:selected" ).text()
       },
+      beforeSend: (xhr) => { $('#preloader').show() },
       success: (result) => {
+        $('#preloader').hide()
         arr = []
         delrows = []
         delrowsFront = []
@@ -425,6 +464,7 @@ $(document).ready(() => {
           data: {
             tableId : result.id
           },
+          beforeSend: (xhr) => { $('#preloader').show() },
           type: 'post',
           success: (result) => {
             if (result == 'No rows') {
@@ -442,26 +482,28 @@ $(document).ready(() => {
 
   $('.logout').click(() => {
     $.ajax({
-      url: "http://10.221.75.105/logout",
+      url: "http://10.221.75.105/table/logout",
       type: "post",
       success: () => {
-        window.open('/', '_self')
+        window.open('/login', '_self')
       }
     })
   })
 
   //tree
 
+  let i = 0
   $.ajax({
     url: 'http://10.221.75.105/table/get-services',
     type: 'get',
+    beforeSend: (xhr) => { $('#preloader').show() },
     success: (parents) => {
+      $('#perloader').hide()
       $.ajax({
         url: 'http://10.221.75.105/table/get-departs',
         type: 'get',
         success: (childes) => {
-          console.log(childes)
-          createTree(parents, childes)
+          createTree(parents, childes, permissions)
           $('.treeview').treeView()
         }
       })
@@ -469,35 +511,61 @@ $(document).ready(() => {
   })
 
   $('.treeview').on('click', 'li', function() {
-    if($(this).attr('type') == 'depart') {
+    if($(this).attr('type') == 'depart' && $(this).attr('disable') == "false") {
       $.ajax({
         url: 'http://10.221.75.105/table/get-table',
         data : {
           openTable : $(this).attr('class')
         },
         type: 'post',
+        beforeSend: (xhr) => { $('#preloader').show() },
         success: (result) => {
-          if (!result) alert('Недостаточно прав')
-          $('.treeview li').css('border', '0')
-          $(this).css('border-left', '1px solid black')
-          $('tbody tr').remove()
-          createTable(result)
+          $('#preloader').hide()
+          if (result == 'No rows') {
+            $('.no-rows').show()
+            $('.tablewarp').hide()
+          } else {
+            $('.treeview li').css('border', '0')
+            $(this).css('border-bottom', '1px solid #ecf0f1')
+            
+            $('.no-rows').hide()
+            $('tbody tr').remove()
+            createTable(result)
+            $('.tablewarp').fadeIn('fast')
+          }
         }
       })
+    } else {
+      console.log('Redjam Permission Controller')
     }
   })
 
   let treeOpened = 0
-
   $('#treeopen').click(() => {
     if(treeOpened == 0) {
       $('.pagewarp').css('grid-template-columns', '300px 1fr')
+      $('#treeopen').html('<i class="fas fa-chevron-left"></i>')
       treeOpened++
     } else {
       $('.pagewarp').css('grid-template-columns', '0px 1fr')
+      $('#treeopen').html('<i class="fas fa-chevron-right"></i>')
       treeOpened--
     }
 
+  })
+
+  $('.treeview li').each(function() {
+    console.log($(this).attr('level'))
+  })
+
+  $('#adminbtn').click(() => {
+    $.ajax({
+      url: 'http://10.221.75.105/admin',
+      type: 'get',
+      success: () => {
+        window.open('http://10.221.75.105/admin', '_self')
+      }
+    })
   })
 
 })

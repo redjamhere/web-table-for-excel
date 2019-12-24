@@ -1,14 +1,3 @@
-.w-modal
-  .change-data-modal.m-warper
-    .m-header
-      h2 Изменение запись
-      span(id="m-close") 
-        i(class="fas fa-times")
-    .m-textarea
-      textarea(class="m-input form-control" id="m-input" name="data-input" rows="5")
-    .m-buttons
-      button(id="m-save" name="m-save" class="btn btn-success") Сохранить в таблицу
-
 .w-modal-file
   .change-data-modal-f.m-warper-f
     .mf-header
@@ -46,12 +35,14 @@
   button(type="button" id="opentreebtn" class="opentreebtn")
   #tree
     .tree-header
-      h4 
+      h4 Сервисы и службы
     .tree-content
       ul.treeview
+      .admin-warp
+        span(id="adminbtn") Панель администратора
 
   article(id="article")
-    div(class="treeopen" id="treeopen") Навигация
+    div(class="treeopen" id="treeopen") <i class="fas fa-chevron-right"></i>
     .tablewarp
       .table
         table(id="t-tbl" class="t-tbl table table-striped table-bordered table-hover" cellspacing="0")

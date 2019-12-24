@@ -17,12 +17,12 @@ const getChildCountInParent = (parent, child) => {
   return count
 }
 
-const buildEditor = (currentUser, services, departs) => {
+const buildEditor = (currentUser) => {
 
   $('#lastname-inp').val(currentUser.Lastname)
   $('#firstname-inp').val(currentUser.Firstname)
   $('#middlename-inp').val(currentUser.Middlename)
-  $('#duty-inp').val(currentUser.duty)
+  $('#duty-inp').val(currentUser.Duty)
   
   //detect depart
 
@@ -39,7 +39,7 @@ const generateUsersList = function() {
 
         let li = `<li class="item${i}" id="${result[i].id}"></li>`
         let fullname = `<span class="text-item" id="user-standard-info">${result[i].Lastname} ${result[i].Firstname} ${result[i].Middlename} </span>`
-        let duty = `<span id="user-position">${result[i].duty}</span>`
+        let duty = `<span id="user-position">${result[i].Duty}</span>`
 
         $('.users-ul').append(li)
         $(`.item${i}`).append(fullname)
@@ -53,9 +53,12 @@ const generateUsersList = function() {
 
 $(document).ready(() => {
   // new WOW().init()
-  
+  console.log($('#service-inp').text())
   //users info variables
   let users = []
+  let departs = []
+  let services = []
+
   let currentUser
 
   //openclose statuses
@@ -76,13 +79,37 @@ $(document).ready(() => {
   //generate departs in editer window
 
   $.ajax({
+    url: 'http://10.221.75.105/admin/services',
+    type: 'post',
+    success: (result) => {
+      result.forEach(service => {
+        $('#service-inp').append(`<option value="${service.ShortName}">${service.FullName}</option>`)
+      });
+    }
+  })
+
+  $.ajax({
     url: 'http://10.221.75.105/admin/departs',
     type: 'post',
     success: (result) => {
       result.forEach(depart => {
-        $('#depart-inp').append(`<option value="${depart.OtdelSmallName}">${depart.OtdelFullName}</option>`)
+        $('#depart-inp').append(`<option value="${depart.Shortname}">${depart.Fullname}</option>`)
       });
     }
+  })
+
+  $('#service-inp').on('change', function(){
+    $.ajax({
+      url: 'http://10.221.75.105/admin/departs',
+      type: 'post',
+      data: {service: $(this).children("option:selected").val()},
+      success: (result) => {
+        $("#depart-inp option").remove()
+        result.forEach(depart => {
+          $('#depart-inp').append(`<option value="${depart.Shortname}">${depart.Fullname}</option>`)
+        });
+      }
+    })
   })
 
   $('.editer').hide()
@@ -131,9 +158,9 @@ $(document).ready(() => {
 
   })
 
-  $('.close-warp .fa-times').click(() => {
+  $('.fa-times').click(() => {
     $('.editer').hide()
-    editerStatus = 0
+    editerStatus--
   })
 
 })    

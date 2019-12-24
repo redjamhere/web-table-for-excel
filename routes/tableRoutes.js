@@ -60,7 +60,6 @@ router.post('/fileupload', (req, res) => {
 //gettable
 //select table with inventar data
 router.post('/get-table', (req, res) => {
-  console.log(req.session)
   if(req.body.openTable) {
     con.query(`select Level from service_departs where Shortname = '${req.body.openTable}'`)
       .then(rows => {
@@ -72,9 +71,15 @@ router.post('/get-table', (req, res) => {
               console.log(req.session)
               req.session.save()
             })
+            .catch(err => {
+              res.send('No rows')
+            })
         } else {
           res.send(false)
         }
+      })
+      .catch(err => {
+        res.send('No rows')
       })
   } else {
     con.query(`select * from ${req.session.userdata.DepartName}`)
@@ -82,7 +87,7 @@ router.post('/get-table', (req, res) => {
         res.send(rows)
       })
       .catch(err => {
-        res.send(err)
+        res.send('No rows')
       })
   }
 })
@@ -123,16 +128,14 @@ router.post('/change-data', (req, res) => {
 })
 
 router.post('/delete-row', (req, res) => {
-  con.query(`call getUserTable(${req.session.table})`, (err, result) => {
-    let rows = req.body.datas
-    console.log(rows)
-    con.query(`DELETE FROM ${result[0][0].OtdelSmallName} WHERE id IN (?)`, [rows], (err, result) => {
-      if (err)
-        console.log(err)
-      else 
-        res.send('ok')
+  let rows = req.body.datas
+  con.query(`DELETE FROM ${req.session.userdata.DepartName} WHERE id IN (?)`, [rows])
+    .then(_ => {
+      res.send('ok')
     })
-  })
+    .catch(err => {
+      res.send(err)
+    })
 })
 
 router.post('/permission', (req, res) => {
@@ -154,7 +157,8 @@ router.get('/get-services', (req, res) => {
           icon: 'img/wrench.png',
           parent: '#',
           children: true,
-          short: s.ShortName
+          short: s.ShortName,
+          level: s.Level
         }
         nodes.push(newService)
       })
@@ -174,7 +178,8 @@ router.get('/get-departs', (req, res) => {
           icon: 'img/table.png',
           parent: d.Parent + 'service',
           children: false,
-          short: d.Shortname
+          short: d.Shortname,
+          level: d.Level
         }
         departs.push(newDepart)
       })
@@ -182,11 +187,32 @@ router.get('/get-departs', (req, res) => {
     })
 })
 
-setInterval(() => {
-  con.query('select 1')
+router.post('/getperm', (req, res) => {
+  res.send({
+    departView: req.session.userdata.DepartViewPermission,
+    serviceView: req.session.userdata.ServiceViewPermission,
+    readWrite: req.session.userdata.Readwrite
+  })
+})
+
+router.post('/logout', (req,res) => {
+  console.log(req.session)
+  req.session.destroy()
+  res.redirect('/')
+})
+
+router.post('/supercheck', (req, res) => {
+  con.query(`SELECT DepartViewPermission FROM users WHERE username = '${req.session.userdata.username}'`)
     .then(rows => {
-      console.log(rows)
+      if (rows[0].DepartViewPermission == 0) {
+        res.send(true)
+      } else {
+        res.send(false)
+      }
     })
-}, 20000)
+    .catch(err => {
+      res.send(err)
+    })
+})
 
 module.exports = router
