@@ -51,22 +51,33 @@
               .service-info
                 h4.block-header Сервис
                 .input-cell
+                  #preloader-service.mini-preloader
+                    include ../mini-preloader.html
                   label(for="service-inp" class="service-lab") Назначить сервис
                   select(name="service-inp" id="service-inp" class="form-control data-inp")
               .depart-info
                 h4.block-header Отдел
                 .input-cell
+                  #preloader-depart.mini-preloader
+                    include ../mini-preloader.html
                   label(for="depart-inp" class="depart-lab") Назначить отдел
                   select(name="depart-inp" id="depart-inp" class="form-control data-inp")
             .input-warper
               .view-permissions
                 h4.block-header Права просмотра
                 .input-cell
-                  label(for="servicePerm-inp" class="servicePerm-lab") Просмотр сервисов
-                  input(type="text" id="servicePerm-inp" name="servicePerm-inp" class="data-inp form-control" value="1")
-                .input-cell
-                  label(for="departPerm-inp" class="departPerm-lab") Просмотр отделов
-                  input(type="text" id="departPerm-inp" name="deaprtPerm-inp" class="data-inp form-control" value="1")
+                  #preloader-service-perm.mini-preloader
+                    include ../mini-preloader.html
+                  label(for="service-inp" class="service-lab") Выбор сервисов и служб
+                  select(name="service-inp" id="service-perm-inp" class="form-control data-inp")
+                .input-cell(class="choose-depart-block")
+                  #preloader-depart-perm.mini-preloader
+                    include ../mini-preloader.html
+                  ul(class="choose-depart-list")
+                    li
+                      label
+                        input(type="checkbox" checked="true")
+                        span(class="choose-depart-text") some text
               .rw-permission
                 h4.block-header Права редактирования
                 .input-cell

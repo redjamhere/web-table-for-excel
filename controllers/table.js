@@ -1,3 +1,5 @@
+const ip = '10.221.75.105'
+
 function createTable (result) {
           // insert rows in table
           let j = 1;
@@ -36,11 +38,18 @@ function createTree (parents, childes, permissions) {
       p += '<ul>'
       for(let j = 0; j < childes.length; j++) {
         if (childes[j].parent == parents[i].id) {
-          if(permissions.departView <= childes[j].level)
+          
+          if(permissions.godMode == 1) {
             c += `<li id="${childes[j].id}" class="${childes[j].short}" type="depart" disable="false" level="${childes[i].level}"><i class="fas fa-table" style="margin-right: 20px"></i> ${childes[j].text}</li>`
-          else
-            c += `<li id="${childes[j].id}" class="${childes[j].short}" style="color: gray;" type="depart" disable="true" level="${childes[i].level}"><i class="fas fa-table" style="margin-right: 20px"></i> ${childes[j].text}</li>`
+          } else {
+              if(permissions.departView.indexOf(`${parseInt(childes[j].id)}`) >= 0) 
+                c += `<li id="${childes[j].id}" class="${childes[j].short}" type="depart" disable="false" level="${childes[i].level}"><i class="fas fa-table" style="margin-right: 20px"></i> ${childes[j].text}</li>`
+              else 
+                c += `<li id="${childes[j].id}" class="${childes[j].short}" style="color: gray;" type="depart" disable="true" level="${childes[i].level}"><i class="fas fa-table" style="margin-right: 20px"></i> ${childes[j].text}</li>`
+          }
+
         }
+
       }
       p += c
       c = ''
@@ -55,7 +64,7 @@ function createTree (parents, childes, permissions) {
 
 function getTable() {
   $.ajax({
-    url: 'http://10.221.75.105/table/get-table',
+    url: `http://${ip}/table/get-table`,
     type: 'post',
     success: (result) => {
       if (result == 'No rows') {
@@ -82,7 +91,7 @@ $(document).ready(() => {
   let permissions
 
   $.ajax({
-    url: 'http://10.221.75.105/table/getperm',
+    url: `http://${ip}/table/getperm`,
     type: 'POST',
     success: (result) => {
       permissions = result
@@ -92,9 +101,9 @@ $(document).ready(() => {
         $('.n-add').attr('disabled', 'disabled')
         $('.upex').hide()
       }
-      if(!permissions.departView && !permissions.serviceView) {
+      if(permissions.godMode == 1) {
         $.ajax({
-          url: 'http://10.221.75.105/table/supercheck',
+          url: `http://${ip}/table/supercheck`,
           type: 'post',
           success: (result) => {
             if(result) {
@@ -109,7 +118,7 @@ $(document).ready(() => {
   $('.pagewarp').css('grid-template-columns', '0px, 1fr')
   // get data for table
   $.ajax({
-    url: 'http://10.221.75.105/table/get-table',
+    url: `http://${ip}/table/get-table`,
     type: 'post',
     beforeSend: (xhr) => { $('#preloader').show() },
     success: (result) => {
@@ -125,7 +134,7 @@ $(document).ready(() => {
 
   $('.n-adm').click(() => {
     $.ajax({
-      url: 'http://10.221.75.105/admin',
+      url: `http://${ip}/admin`,
       type: 'get',
       success: (result) => {
         window.open('/admin', '_self')
@@ -244,7 +253,7 @@ $(document).ready(() => {
         }
           
         $.ajax({
-          url: 'http://10.221.75.105/table/change-data',
+          url: `http://${ip}/table/change-data`,
           type: 'post',
           data: {
             datas: tmp,
@@ -261,7 +270,7 @@ $(document).ready(() => {
       }
       if (delrows.length > 0) {
         $.ajax({
-          url: 'http://10.221.75.105/table/delete-row',
+          url: `http://${ip}/table/delete-row`,
           type: 'post',
           data: {
             datas: delrows,
@@ -313,7 +322,7 @@ $(document).ready(() => {
   $('.n-add').click(() => {
     if(permissions.readWrite) {
       $.ajax({
-        url: 'http://10.221.75.105/table/add-data',
+        url: `http://${ip}/table/add-data`,
         type: 'post',
         success: (result) => {
             if(arr.length > 0) {
@@ -324,7 +333,7 @@ $(document).ready(() => {
               }
                 
               $.ajax({
-                url: 'http://10.221.75.105/table/change-data',
+                url: `http://${ip}/table/change-data`,
                 type: 'post',
                 data: {
                   datas: tmp,
@@ -363,7 +372,7 @@ $(document).ready(() => {
       
       function getResponse(data) {
         return  $.ajax({
-          url: 'http://10.221.75.105/table/fileupload',
+          url: `http://${ip}/table/fileupload`,
           type: 'post',
           data: data,
           cache: false,
@@ -376,7 +385,7 @@ $(document).ready(() => {
       let response = getResponse(data).responseText
       if(response == 'ok') {
         $.ajax({
-          url: 'http://10.221.75.105/table/get-table',
+          url: `http://${ip}/table/get-table`,
           type: 'post',
           beforeSend: (xhr) => { $('#preloader').show() },
           success: (result) => {
@@ -446,7 +455,7 @@ $(document).ready(() => {
   $('#selectGroup').on('change', () => {
     tmp = []
     $.ajax({
-      url: 'http://10.221.75.105/change-table',
+      url: `http://${ip}/change-table`,
       type: 'post',
       data: {
         tableName: $("#selectGroup option:selected" ).text()
@@ -460,7 +469,7 @@ $(document).ready(() => {
         $('.n-undo').hide()
         $('.n-save').hide()
         $.ajax({
-          url: 'http://10.221.75.105/get-table',
+          url: `http://${ip}/get-table`,
           data: {
             tableId : result.id
           },
@@ -482,7 +491,7 @@ $(document).ready(() => {
 
   $('.logout').click(() => {
     $.ajax({
-      url: "http://10.221.75.105/table/logout",
+      url: `http://${ip}/table/logout`,
       type: "post",
       success: () => {
         window.open('/login', '_self')
@@ -494,13 +503,13 @@ $(document).ready(() => {
 
   let i = 0
   $.ajax({
-    url: 'http://10.221.75.105/table/get-services',
+    url: `http://${ip}/table/get-services`,
     type: 'get',
     beforeSend: (xhr) => { $('#preloader').show() },
     success: (parents) => {
       $('#perloader').hide()
       $.ajax({
-        url: 'http://10.221.75.105/table/get-departs',
+        url: `http://${ip}/table/get-departs`,
         type: 'get',
         success: (childes) => {
           createTree(parents, childes, permissions)
@@ -513,7 +522,7 @@ $(document).ready(() => {
   $('.treeview').on('click', 'li', function() {
     if($(this).attr('type') == 'depart' && $(this).attr('disable') == "false") {
       $.ajax({
-        url: 'http://10.221.75.105/table/get-table',
+        url: `http://${ip}/table/get-table`,
         data : {
           openTable : $(this).attr('class')
         },
@@ -522,8 +531,14 @@ $(document).ready(() => {
         success: (result) => {
           $('#preloader').hide()
           if (result == 'No rows') {
+            $('.treeview li').css('border', '0')
+            $(this).css('border-bottom', '1px solid #ecf0f1') 
+            $('.no-rows > h1').text('Нет данных для отображения')
             $('.no-rows').show()
             $('.tablewarp').hide()
+          } else if(!result) {
+            $('.no-rows > h1').text('Недостаточно прав')
+            $('.no-rows').show()
           } else {
             $('.treeview li').css('border', '0')
             $(this).css('border-bottom', '1px solid #ecf0f1')
@@ -560,10 +575,10 @@ $(document).ready(() => {
 
   $('#adminbtn').click(() => {
     $.ajax({
-      url: 'http://10.221.75.105/admin',
+      url: `http://${ip}/admin`,
       type: 'get',
       success: () => {
-        window.open('http://10.221.75.105/admin', '_self')
+        window.open(`/admin`, '_blank')
       }
     })
   })

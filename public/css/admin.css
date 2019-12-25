@@ -157,6 +157,8 @@
 .editer {
   width: 100%;
   padding: 0 10px 0 10px;
+  height: 80vh;
+  overflow: auto;
 }
 
 .userfio {
@@ -251,4 +253,39 @@
 
 #user-position {
   margin-left: 20px;
+}
+
+.choose-depart-list {
+  max-height: 200px;
+  overflow: auto;
+}
+
+.choose-depart-block {
+  margin-top: 20px;
+}
+
+.choose-depart-text {
+  font-size: 18px;
+  color: #636e72;
+}
+
+.choose-depart-list li {
+  border-bottom: 1px solid #ecf0f1;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.choose-depart-list label, input {
+  cursor: pointer;
+}
+
+
+.choose-depart-list li:hover {
+  background: rgba(99, 110, 114, .2);
+}
+
+.mini-preloader{
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

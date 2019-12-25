@@ -1,3 +1,5 @@
+const ip = '10.221.75.105'
+
 function doMarginTop(marginned, ul, direction) {
   let pixels = 0
   $(ul).filter(function(){
@@ -18,6 +20,52 @@ const getChildCountInParent = (parent, child) => {
 }
 
 const buildEditor = (currentUser) => {
+  $("#service-inp option").remove()
+  $("#service-perm-inp option").remove()
+  $("#depart-inp option").remove()
+  $(".choose-depart-list li").remove()
+
+  $.ajax({
+    url: `http://${ip}/admin/services`,
+    type: 'post',
+    beforeSend: (xhr) => {
+      $('#preloader-service').show()
+      $('#preloader-service-perm').show()
+    },
+    success: (result) => {
+      $('#preloader-service').hide()
+      $('#preloader-service-perm').hide()
+      result.forEach(service => {
+        if(service.ShortName == currentUser.ServiceName){
+          $('#service-inp').append(`<option selected value="${service.ShortName}">${service.FullName}</option>`)
+          $('#service-perm-inp').append(`<option selected value="${service.ShortName}">${service.FullName}</option>`)
+        } else {
+          $('#service-inp').append(`<option value="${service.ShortName}">${service.FullName}</option>`)
+          $('#service-perm-inp').append(`<option value="${service.ShortName}">${service.FullName}</option>`)
+        }       
+      });
+      $.ajax({
+        url: `http://${ip}/admin/departs`,
+        type: 'post',
+        data: {service: $('#service-inp').children('option:selected').val()},
+        beforeSend: (xhr) => {
+          $('#preloader-depart').show()
+          $('#preloader-depart-perm').show()
+        },
+        success: (result) => {
+          $('#preloader-depart').hide()
+          $('#preloader-depart-perm').hide()
+          result.forEach(depart => {
+            $('#depart-inp').append(`<option value="${depart.Shortname}">${depart.Fullname}</option>`)
+            
+            let li = `<li><label><input type="checkbox" name="${depart.Shortname}"/><span class="choose-depart-text">${depart.Fullname}</span></label></li>`
+            $('.choose-depart-list').append(li)
+          });
+        }
+      })
+    }
+  })
+
 
   $('#lastname-inp').val(currentUser.Lastname)
   $('#firstname-inp').val(currentUser.Firstname)
@@ -31,8 +79,9 @@ const buildEditor = (currentUser) => {
 //ajax get all users data
 
 const generateUsersList = function() {
+  
   $.ajax({
-    url: 'http://10.221.75.105/admin/userslist',
+    url: `http://${ip}/admin/userslist`,
     type: 'post',
     success: (result) => {
       for(let i = 0; i < result.length; i++) {
@@ -53,8 +102,13 @@ const generateUsersList = function() {
 
 $(document).ready(() => {
   // new WOW().init()
-  console.log($('#service-inp').text())
   //users info variables
+
+  $('#preloader-service').hide()
+  $('#preloader-depart').hide()
+  $('#preloader-service-perm').hide()
+  $('#preloader-depart-perm').hide()
+
   let users = []
   let departs = []
   let services = []
@@ -67,7 +121,7 @@ $(document).ready(() => {
 
   //get all user info
   $.ajax({
-    url: 'http://10.221.75.105/admin/users',
+    url: `http://${ip}/admin/users`,
     type: 'post',
     success: (result) => {
       users.push(result)
@@ -78,36 +132,45 @@ $(document).ready(() => {
 
   //generate departs in editer window
 
-  $.ajax({
-    url: 'http://10.221.75.105/admin/services',
-    type: 'post',
-    success: (result) => {
-      result.forEach(service => {
-        $('#service-inp').append(`<option value="${service.ShortName}">${service.FullName}</option>`)
-      });
-    }
-  })
-
-  $.ajax({
-    url: 'http://10.221.75.105/admin/departs',
-    type: 'post',
-    success: (result) => {
-      result.forEach(depart => {
-        $('#depart-inp').append(`<option value="${depart.Shortname}">${depart.Fullname}</option>`)
-      });
-    }
-  })
-
   $('#service-inp').on('change', function(){
     $.ajax({
-      url: 'http://10.221.75.105/admin/departs',
+      url: `http://${ip}/admin/departs`,
       type: 'post',
       data: {service: $(this).children("option:selected").val()},
+      beforeSend: (xhr) => {
+        $('#preloader-depart').show()
+        $('.depart-info').hide()
+      },
       success: (result) => {
+        $('#preloader-depart').hide()
+        $('.depart-info').show()
+
         $("#depart-inp option").remove()
         result.forEach(depart => {
           $('#depart-inp').append(`<option value="${depart.Shortname}">${depart.Fullname}</option>`)
         });
+      }
+    })
+  })
+
+
+  $('#service-perm-inp').on('change', function(){
+    $.ajax({
+      url: `http://${ip}/admin/departs`,
+      type: 'post',
+      data: {service: $(this).children("option:selected").val()},
+      beforeSend: (xhr) => {
+        $('#preloader-depart-perm').show()
+        $('.view-permissions').hide()
+      },
+      success: (result) => {
+        $('#preloader-depart-perm').hide()
+        $('.view-permissions').show()
+        $(".choose-depart-list li").remove()
+        result.forEach(depart => {
+          let li = `<li><label><input type="checkbox" name="${depart.Shortname}"/><span class="choose-depart-text">${depart.Fullname}</span></label></li>`
+          $('.choose-depart-list').append(li)
+        })
       }
     })
   })
@@ -118,7 +181,7 @@ $(document).ready(() => {
 
   $('#n-back').click(() => {
     $.ajax({
-      url: 'http://10.221.75.105/',
+      url: `http://${ip}/`,
       type: 'get',
       success: () => {
         window.open('/', '_self')
@@ -148,18 +211,18 @@ $(document).ready(() => {
       }
     }
     if(editerStatus == 0) {
-      $('.editer').show('fade', 400)
+      $('.editer').show('slide', 400)
       buildEditor(currentUser)
       editerStatus++
     } else {
-      $('.editer').hide('fade', 400)
+      $('.editer').hide('slide', 400)
       editerStatus--
     }
 
   })
 
   $('.fa-times').click(() => {
-    $('.editer').hide()
+    $('.editer').hide('fade', 400)
     editerStatus--
   })
 

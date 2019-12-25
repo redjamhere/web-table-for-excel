@@ -61,9 +61,9 @@ router.post('/fileupload', (req, res) => {
 //select table with inventar data
 router.post('/get-table', (req, res) => {
   if(req.body.openTable) {
-    con.query(`select Level from service_departs where Shortname = '${req.body.openTable}'`)
+    con.query(`select id from service_departs where Shortname = '${req.body.openTable}'`)
       .then(rows => {
-        if(rows[0].Level >= req.session.userdata.DepartViewPermission) {
+        if(req.session.userdata.DepartViewPermission.split(', ').indexOf(`${parseInt(rows[0].id)}`) >= 0 || req.session.userdata.GodMode == 1) {
           con.query(`select * from ${req.body.openTable}`)
             .then(rows => {
               res.send(rows)
@@ -138,13 +138,6 @@ router.post('/delete-row', (req, res) => {
     })
 })
 
-router.post('/permission', (req, res) => {
-  res.send({
-    readwrite : req.session.userdata.readwrite,
-    permission : req.session.userdata.Permission
-  })
-})
-
 router.get('/get-services', (req, res) => {
   let nodes = []
 
@@ -189,9 +182,10 @@ router.get('/get-departs', (req, res) => {
 
 router.post('/getperm', (req, res) => {
   res.send({
-    departView: req.session.userdata.DepartViewPermission,
+    departView: req.session.userdata.DepartViewPermission.split(', '),
     serviceView: req.session.userdata.ServiceViewPermission,
-    readWrite: req.session.userdata.Readwrite
+    readWrite: req.session.userdata.Readwrite,
+    godMode: req.session.userdata.GodMode
   })
 })
 
@@ -202,9 +196,9 @@ router.post('/logout', (req,res) => {
 })
 
 router.post('/supercheck', (req, res) => {
-  con.query(`SELECT DepartViewPermission FROM users WHERE username = '${req.session.userdata.username}'`)
+  con.query(`SELECT GodMode FROM users WHERE username = '${req.session.userdata.username}'`)
     .then(rows => {
-      if (rows[0].DepartViewPermission == 0) {
+      if (rows[0].GodMode == 1) {
         res.send(true)
       } else {
         res.send(false)
