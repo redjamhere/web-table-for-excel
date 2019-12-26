@@ -289,3 +289,15 @@
   align-items: center;
   justify-content: center;
 }
+
+#user-filter {
+  margin: 10px 0 10px 0;
+}
+
+.item-add{
+  color: rgb(26, 188, 156);;
+}
+
+#deleteUser-btn{
+  margin-left: 20px;
+}

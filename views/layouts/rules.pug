@@ -11,16 +11,18 @@
   article(id="article")
     .usersList
       .dropDownBtn
-        button(type="button" id="userlist-btn" class="userlist-btn drp-btn") 
+        button(type="button" id="userlist-btn" class="userlist-btn drp-btn")
           span(id="dropbtnName") Все сотрудники
           span(class=".arrow") 
             i(class="fas fa-sort-down")
             i(class="fas fa-sort-up")
+        input(type="text" id="user-filter" class="form-control" placeholder="Поиск по сотрудникам")
         .list
+          #preloader-userlist.mini-preloader
+            include ../mini-preloader.html
           ul(class="list-ul users-ul")
-            //- li(class="item1")
-            //-   span(class="text-item" id="user-standard-info") Иванов Иван Иванович 
-            //-     span(id="user-position") Руководитель чего-то 
+            li(class="item-add")
+              span(class="text-item" id="addUser") <i class="fas fa-plus"></i> Добавить пользователя
             //- li(class="item2")
             //-   span(class="text-item" id="user-standard-info") Сидоров Сергей Сергеевич 
             //-     span(id="user-position") Исполнитель чего-то
@@ -29,7 +31,8 @@
             //-     span(id="user-position") Приниматель чего-то
           .editer
             .close-warp
-              i(class="fas fa-times")
+              .close-btn
+                i(class="fas fa-times")
             .input-warper
               .userfio
                 h4.block-header ФИО
@@ -74,17 +77,13 @@
                   #preloader-depart-perm.mini-preloader
                     include ../mini-preloader.html
                   ul(class="choose-depart-list")
-                    li
-                      label
-                        input(type="checkbox" checked="true")
-                        span(class="choose-depart-text") some text
               .rw-permission
                 h4.block-header Права редактирования
                 .input-cell
                   label(for="rwPerm-inp" class="rwPerm-lab") Редактирование
-                  select(name="otdel-inp" class="form-control data-inp")
-                    option(value="true") Да
-                    option(value="false") Нет
+                  select(name="rwPerm-inp" id="rwPerm-inp" class="form-control data-inp")
+                    option(value="1") Да
+                    option(value="0") Нет
                 //- .input-cell
                 //-   label(for="permissionInfo" class="perInfo-lab") Документация по разгранечению прав
                 //-   button(type="button" id="permissionInfo" class="btn btn-primary") Открыть
@@ -100,5 +99,9 @@
                   label(for="password-inp" class="password-lab") Изменить пароль
                   input(type="password" id="password-inp" name="password-inp" class="data-inp form-control" value="password")
             .button-warper
-              button(type="button" id="saveUserSettings" class="btn btn-success") Сохранить
+              button(type="button" id="saveUserSettings" class="btn btn-success") Сохранить изменения
+              button(type="button" id="deleteUser-btn" class="btn btn-danger") Удалить пользователя
+              button(type="button" id="addUser-btn" class="btn btn-warning") Добавить пользователя
+
+      
       
