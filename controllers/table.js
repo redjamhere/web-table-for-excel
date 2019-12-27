@@ -537,6 +537,7 @@ $(document).ready(() => {
             $('.no-rows').show()
             $('.tablewarp').hide()
           } else if(!result) {
+            $('tbody tr').remove()
             $('.no-rows > h1').text('Недостаточно прав')
             $('.no-rows').show()
           } else {

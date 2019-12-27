@@ -23,12 +23,6 @@
           ul(class="list-ul users-ul")
             li(class="item-add")
               span(class="text-item" id="addUser") <i class="fas fa-plus"></i> Добавить пользователя
-            //- li(class="item2")
-            //-   span(class="text-item" id="user-standard-info") Сидоров Сергей Сергеевич 
-            //-     span(id="user-position") Исполнитель чего-то
-            //- li(class="item3")
-            //-   span(class="text-item" id="user-standard-info") Петров Петр Петрович 
-            //-     span(id="user-position") Приниматель чего-то
           .editer
             .close-warp
               .close-btn
@@ -102,6 +96,31 @@
               button(type="button" id="saveUserSettings" class="btn btn-success") Сохранить изменения
               button(type="button" id="deleteUser-btn" class="btn btn-danger") Удалить пользователя
               button(type="button" id="addUser-btn" class="btn btn-warning") Добавить пользователя
+    .serviceList
+      .dropDownBtn
+        button(type="button" id="serviceList-btn" class="serviceList-btn drp-btn")
+          span(id="dropbtnName") Все сервисы
+          span(class=".arrow") 
+            i(class="fas fa-sort-down")
+            i(class="fas fa-sort-up")
+        input(type="text" id="service-filter" class="form-control" placeholder="Поиск по сервисам")
+        .list
+          #preloader-servicelist.mini-preloader
+            include ../mini-preloader.html
+          ul(class="list-ul service-ul")
+            li(class="item-add-service")
+              span(class="text-item" id="addService") <i class="fas fa-plus"></i> Добавить сервис
+          .service-editer
+            .close-warp
+              .close-btn
+                i(class="fas fa-times")
+            .departs-control-panel
+              ul.departs-control-list
+                li.add-depart-item
+                  button(type="button" class="add-depart btn btn-warning" id="add-depart") Добавить службу
+            .departs-list-warp
+              ul.departs-list
+
 
       
       

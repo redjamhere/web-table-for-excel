@@ -20,7 +20,7 @@ const checkSecurity = function(req, res, next) {
   }
 }
 
-router.use(checkSecurity)
+// router.use(checkSecurity)
 
 router.get('/', (req, res, next) => {
   res.render('admin')
@@ -69,7 +69,6 @@ router.post('/userdatasave', (req, res) => {
   let saves = req.body.saves
   con.query(`SELECT * FROM users WHERE username = '${saves.username}'`)
     .then(rows => {
-      console.log(rows[0].id)
       if(rows.length === 0 || rows[0].id == req.body.user_id) {
         con.query(`UPDATE users SET 
           Firstname = '${saves.Firstname}', 
@@ -103,8 +102,9 @@ router.post('/userdatasave', (req, res) => {
 router.post('/userdataadd', (req, res) => {
   let adds = req.body.adds
 
-  con.query(`SELECT * FROM users WHERE username = '${saves.username}'`)
+  con.query(`SELECT * FROM users WHERE username = '${adds[3]}'`)
     .then(rows => {
+      console.log(rows)
       if(rows.length === 0) {
         con.query(`INSERT INTO users (Firstname, Lastname, Middlename, username, password, Readwrite, DepartViewPermission, DepartName, ServiceName, Duty) VALUES(?)`, [adds])
           .then(rows => {

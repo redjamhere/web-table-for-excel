@@ -26,8 +26,10 @@
   
   #article {
     grid-area: article;
+    width: 100%;
     overflow: auto;
     padding: 10px;
+    position: relative;
   }
   
   #nav {
@@ -156,9 +158,19 @@
 
 .editer {
   width: 100%;
+  position: relative;
   padding: 0 10px 0 10px;
   height: 80vh;
   overflow: auto;
+  border-bottom: 1px solid #bdc3c7;
+}
+
+.service-editer {
+  width: 100%;
+  padding: 0 10px 0 10px;
+  height: 80vh;
+  overflow: auto;
+  border-bottom: 1px solid #bdc3c7;
 }
 
 .userfio {
@@ -227,11 +239,14 @@
   }
 
 .close-warp{
-  width: 100%;
   height: 25px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  background: white;
 }
 
   .fa-times{
@@ -290,7 +305,7 @@
   justify-content: center;
 }
 
-#user-filter {
+#user-filter, #service-filter {
   margin: 10px 0 10px 0;
 }
 
@@ -298,6 +313,87 @@
   color: rgb(26, 188, 156);;
 }
 
+.item-add-service{
+  color: #3498db;
+}
+
 #deleteUser-btn{
   margin-left: 20px;
+}
+
+.departs-list-warp {
+  width: 100%;
+  height: 100%;
+}
+
+.departs-list {
+  padding: 0;
+  margin: 0;
+}
+
+.depart-item {
+  border-bottom: 1px solid white;
+  display: flex;
+  flex-direction: column;
+}
+
+.depart-display-info {
+  background: #1abc9c;
+  height: 40px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 10px;
+  padding-right: 10px;
+  transition: .2s;
+  
+}
+
+.depart-li-editor{
+  background: white;
+  height: 50px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: .2s;
+  border-top: 1px dashed #bdc3c7;
+  border-bottom: 1px dashed #bdc3c7;
+  margin: 5px 0 5px 0;
+}
+
+.depart-li-editor input {
+  width: 50%;
+}
+
+.depart-item .depart-display-info:hover {
+  background: #2c3e50;
+}
+
+.depart-item span {
+  color: white;
+}
+
+.delDepart {
+  color: #636e72;
+  transition: .2s;
+}
+
+.delDepart:hover {
+  color: #e74c3c;
+}
+
+.departs-control-list {
+  display: flex;
+  align-items: center;
+}
+
+
+.active-li {
+  background-color: #34495e !important;
+  color: white;
+  font-weight: bold;
 }

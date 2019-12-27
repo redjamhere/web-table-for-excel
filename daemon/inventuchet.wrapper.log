@@ -1,0 +1,18 @@
+2019-12-27 11:24:42 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\zaymanovaa\AppData\Roaming\npm\node_modules\qckwinsvc\node_modules\node-windows\lib\wrapper.js --file C:\Users\zaymanovaa\Desktop\dev\web-table-for-excel\main.js --log "invent-uchet wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2019-12-27 11:24:42 - Started 6384
+2019-12-27 11:26:28 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\zaymanovaa\AppData\Roaming\npm\node_modules\qckwinsvc\node_modules\node-windows\lib\wrapper.js --file C:\Users\zaymanovaa\Desktop\dev\web-table-for-excel\main.js --log "invent-uchet wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2019-12-27 11:26:28 - Started 9384
+2019-12-27 11:28:29 - Stopping inventuchet.exe
+2019-12-27 11:28:29 - ProcessKill 9384
+2019-12-27 11:28:29 - Found child process: 9396 Name: conhost.exe
+2019-12-27 11:28:29 - Found child process: 9508 Name: node.exe
+2019-12-27 11:28:29 - Stopping process 9396
+2019-12-27 11:28:29 - Send SIGINT 9396
+2019-12-27 11:28:29 - SIGINT to 9396 failed - Killing as fallback
+2019-12-27 11:28:29 - Stopping process 9508
+2019-12-27 11:28:29 - Send SIGINT 9508
+2019-12-27 11:28:29 - SIGINT to 9508 failed - Killing as fallback
+2019-12-27 11:28:29 - Stopping process 9384
+2019-12-27 11:28:29 - Send SIGINT 9384
+2019-12-27 11:28:29 - SIGINT to 9384 failed - Killing as fallback
+2019-12-27 11:28:29 - Finished inventuchet.exe

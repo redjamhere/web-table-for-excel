@@ -16,6 +16,7 @@ const getChildCountInParent = (parent, child) => {
   $(parent).filter(function() {
     count = $(this).children(child).length
   })
+  console.log(count)
   return count
 }
 
@@ -25,10 +26,6 @@ const generateCheckedDeparts = (departs, ul) => {
       $(this).attr('checked', 'checked')
     }
   })
-}
-
-const getAllUsers = () => {
-
 }
 
 
@@ -109,7 +106,11 @@ const buildEditor = (currentUser, departs) => {
 
 }
 
-const saveUserData = (currentUser, departs) => {
+const buildServiceEditor = (currentService) => {
+  generateDepartList(currentService)
+}
+
+const saveUserData = (departs) => {
   const savingData = {
     Firstname: $('#firstname-inp').val(),
     Lastname: $('#lastname-inp').val(),
@@ -122,18 +123,7 @@ const saveUserData = (currentUser, departs) => {
     Service: $('#service-inp').children('option:selected').val(),
     Duty: $('#duty-inp').val()
   }
-
-  $.ajax({
-    url: `http://${ip}/admin/userdatasave`,
-    type: 'post',
-    data: {
-      saves: savingData,
-      user_id: currentUser.id
-    },
-    success: (result) => {
-      alert(result)
-    }
-  })
+  return savingData
 }
 
 const addUserData = (departs) => {
@@ -149,20 +139,7 @@ const addUserData = (departs) => {
     $('#service-inp').children('option:selected').val(),
     $('#duty-inp').val()
   ]
-
-  $.ajax({
-    url: `http://${ip}/admin/userdataadd`,
-    type: 'post',
-    data: {
-      adds: addingData,
-    },
-    success: (result) => {
-      alert(result)
-      $('.editer').hide()
-      $('.users-ul .user-item').remove()
-      generateUsersList()
-    }
-  })
+  return addingData
 }
 
 const deleteUser = (currentUser) => {
@@ -197,15 +174,61 @@ const generateUsersList = function() {
       $('#preloader-userlist').hide()
       for(let i = 0; i < result.length; i++) {
         if(result[i].GodMode == 0) {
-          let li = `<li class="item${i} user-item" id="${result[i].id}"></li>`
+          let li = `<li class="item${i}-user user-item" id="${result[i].id}"></li>`
           let fullname = `<span class="text-item" id="user-standard-info">${result[i].Lastname} ${result[i].Firstname} ${result[i].Middlename} </span>`
           let duty = `<span id="user-position">${result[i].Duty}</span>`
           $('.users-ul').append(li)
-          $(`.item${i}`).append(fullname)
-          $(`.item${i}`).append(duty)
+          $(`.item${i}-user`).append(fullname)
+          $(`.item${i}-user`).append(duty)
         }
       }
     } 
+  })
+}
+
+const generateServiceList = function() {
+  $.ajax({
+    url: `http://${ip}/admin/services`,
+    type: 'post',
+    beforeSend: (xhr) => {
+      $('.service-ul').hide()
+      $('#preloader-servicelist').show()
+    },
+    success: (result) => {
+      $('.service-ul').show()
+      $('#preloader-servicelist').hide()
+      for (let i = 0; i < result.length; i++) {
+        let li = `<li class="item${i}-service service-item" id="${result[i].id}"></li>`
+        let serviceName = `<span class="text-item" id="service-standard-info">${result[i].FullName}</span>`
+        $('.service-ul').append(li)
+        $(`.item${i}-service`).append(serviceName)
+      }
+    }
+  })
+}
+
+const generateDepartList = (currentService) => {
+  $.ajax({
+    url: `http://${ip}/admin/departs`,
+    type: 'post',
+    data: {
+      service: currentService.ShortName
+    },
+    beforeSend: (xhr) => {
+      console.log('loading...')
+    },
+    success: (result) => {
+      $('.departs-list li').remove()
+      result.forEach(depart => {
+        let li = `<li class="${depart.Shortname} depart-item" id="${depart.id}"></li>`
+        let departName = `<span class="${depart.Shortname}-span">${depart.Fullname}</span>`
+        let departDelete = `<div class="delDepart"><i class="fas fa-trash-alt"></i></div>`
+        $('.departs-list').append(li)
+        $(`.${depart.Shortname}`).append(`<div class="${depart.Shortname}-warp depart-display-info"></div>`)
+        $(`.${depart.Shortname}-warp`).append(departName)
+        $(`.${depart.Shortname}-warp`).append(departDelete)
+      })
+    }
   })
 }
 
@@ -217,7 +240,18 @@ const updateUsers = () => {
     processData: false,
     contentType: false,
     async: false,
-  })
+  })  
+}
+
+const updateServices = () => {
+  return  $.ajax({
+    url: `http://${ip}/admin/services`,
+    type: 'post',
+    cache: false,
+    processData: false,
+    contentType: false,
+    async: false,
+  })  
 }
 
 
@@ -226,8 +260,10 @@ $(document).ready(() => {
   // new WOW().init()
   //users info variables
   $('#preloader-userlist').hide()
+  $('#preloader-servicelist').hide()
   $('#addUser-btn').hide()
   $('#user-filter').hide()
+  $('#service-filter').hide()
   $('#preloader-service').hide()
   $('#preloader-depart').hide()
   $('#preloader-service-perm').hide()
@@ -238,15 +274,18 @@ $(document).ready(() => {
   let services = []
 
   let currentUser
+  let currentService
 
   //openclose statuses
-  let editerStatus = 0
   let userListStatus = 0
+  let serviceListStatus = 0
 
   users.push(JSON.parse(updateUsers().responseText))
+  services.push(JSON.parse(updateServices().responseText))
+  
   //get all user info
   generateUsersList()
-
+  generateServiceList()
   //generate departs in editer window
 
   $('#service-inp').on('change', function(){
@@ -298,6 +337,7 @@ $(document).ready(() => {
   })
 
   $('.editer').hide()
+  $('.service-editer').hide()
   $('.list').hide()
   $('.fa-sort-up').hide()
 
@@ -314,13 +354,14 @@ $(document).ready(() => {
   $('#userlist-btn').click(() => {
     if (userListStatus == 0) {
       $('.usersList .list').show('fade', 300)
-      $('.users-ul').css('margin-bottom', `${getChildCountInParent('.users-ul', 'li') * 50}`)
-      $('.fa-sort-down').hide()
-      $('.fa-sort-up').show()
+      $('.usersList').css('height', `${getChildCountInParent('.users-ul', 'li') * 50 + 110}`)
+      $('.usersList .fa-sort-down').hide()
+      $('.usersList .fa-sort-up').show()
       $('#user-filter').show()
       userListStatus++
     } else {
       $('.usersList .list').hide('fade', 300)
+      $('.usersList').css('height', `50`)
       $('.fa-sort-down').show()
       $('.fa-sort-up').hide()
       $('#user-filter').hide()
@@ -328,7 +369,25 @@ $(document).ready(() => {
     }
   })
 
+  $('#serviceList-btn').click(() => {
+    if (serviceListStatus == 0) {
+      $('.serviceList .list').show('fade', 300)
+      $('.service-ul').css('margin-bottom', `${getChildCountInParent('.users-ul', 'li') * 50}`)
+      $('.serviceList .fa-sort-down').hide()
+      $('.serviceList .fa-sort-up').show()
+      $('#service-filter').show()
+      serviceListStatus++
+    } else {
+      $('.serviceList .list').hide('fade', 300)
+      $('.fa-sort-down').show()
+      $('.fa-sort-up').hide()
+      $('#service-filter').hide()
+      serviceListStatus--
+    }
+  })
+
   $('.users-ul').on('click', 'li', function() {
+    $('.users-ul li').removeClass('active-li')
     if($(this).attr('class') == 'item-add') {
         $('.editer').show('slide', {direction: 'right'}, 400)
         departs = []
@@ -340,13 +399,48 @@ $(document).ready(() => {
           departs = currentUser.DepartViewPermission.split(', ')
         }
       } 
+        $(this).addClass('active-li')
         $('.editer').show('slide', {direction: 'right'}, 400)
         buildEditor(currentUser, departs)
     }
   })
 
+  $('.service-ul').on('click', 'li', function() {
+    $('.service-ul li').removeClass('active-li')
+    if($(this).attr('class') == 'item-add-service') {
+        $('.service-editer').show('slide', {direction: 'right'}, 400)
+        // departs = []
+        buildServiceEditor(0)
+    } else {
+      for(let i = 0; i < services[0].length; i++) {
+        if(services[0][i].id == $(this).attr('id')) {
+          currentService = services[0][i]
+        }
+      } 
+        $(this).addClass('active-li')
+        $('.service-editer').show('slide', {direction: 'right'}, 400)
+        buildServiceEditor(currentService)
+    }
+  })
+
+  $('.departs-list').on('click', '.depart-display-info', function() {
+    $(`.depart-li-editor`).remove()
+    
+    let liClass = $(this).parent().attr('class').split(' ')[0]
+    if($(`${liClass} .depart-li-editor`).length > 0) {
+      console.log('qeqeqewq')
+    } else {
+      let liClass = $(this).parent().attr('class').split(' ')[0]
+      text = $(`.${liClass}-span`).text()
+      $(this).parent().append(`<div class="depart-li-editor"><input type="text" class="depart-editor-inp form-control" id="${$(this).attr('class')}-inp" value="${text}"/><button type="button" class="btn btn-success" id="saveDepart">Сохранить</button></div>`)  
+    }
+  })
+
   $('.close-btn').click(() => {
+    $('.service-ul li').removeClass('active-li')
+    $('.users-ul li').removeClass('active-li')
     $('.editer').hide('slide', {direction: 'right'}, 400)
+    $('.service-editer').hide('slide', {direction: 'right'}, 400)
   })
 
   $('.choose-depart-list').on('change', 'input', function() {
@@ -362,15 +456,46 @@ $(document).ready(() => {
   })
 
   $('#saveUserSettings').click(() => {
-    saveUserData(currentUser, departs)
-    users.pop()
-    users.push(JSON.parse(updateUsers().responseText))
+    let newData = saveUserData(departs)
+
+    $.ajax({
+      url: `http://${ip}/admin/userdatasave`,
+      type: 'post',
+      data: {
+        saves: newData,
+        user_id: currentUser.id
+      },
+      success: (result) => {
+        users.pop()
+        users.push(JSON.parse(updateUsers().responseText))
+        alert(result)
+      }
+    })
+
   })
 
   $('#addUser-btn').click(() => {
-    addUserData(departs)
-    users.pop()
-    users.push(JSON.parse(updateUsers().responseText))
+    let newData = addUserData(departs)
+
+    $.ajax({
+      url: `http://${ip}/admin/userdataadd`,
+      type: 'post',
+      data: {
+        adds: newData,
+      },
+      success: (result) => {
+        if(result == 'Имя пользователя занято') {
+          alert(result)
+        } else {           
+          users.pop()
+          users.push(JSON.parse(updateUsers().responseText))
+          alert(result)
+          $('.editer').hide()
+          $('.users-ul .user-item').remove()
+          generateUsersList()
+        }
+      }
+    })
   })
 
   $('#deleteUser-btn').click(() => {
@@ -389,6 +514,16 @@ $(document).ready(() => {
     
   })
 
+  $('#service-filter').keyup(function () {
+
+    var rex = new RegExp('.*(' + $(this).val()+')+.*', 'i');
+    $('.service-ul li').hide();
+    $('.service-ul li').filter(function () {
+        return rex.test($(this).text().replace(/[^\wа-яё]+/gi, ""));
+    }).show();
+    
+  })
+
   $('.logout').click(() => {
     $.ajax({
       url: `http://${ip}/admin/logout`,
@@ -398,4 +533,5 @@ $(document).ready(() => {
       }
     })
   })
+
 })    
