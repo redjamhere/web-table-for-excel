@@ -118,7 +118,11 @@
               ul.departs-control-list
                 li.add-depart-item
                   button(type="button" class="add-depart btn btn-warning" id="add-depart") Добавить службу
+                li.delete-service-item
+                  button(type="button" class="delete-service btn btn-danger" id="delete-service") Удалить сервис
             .departs-list-warp
+              #preloader-departlist.mini-preloader
+                include ../mini-preloader.html
               ul.departs-list
 
 

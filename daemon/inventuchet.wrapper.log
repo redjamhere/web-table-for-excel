@@ -16,3 +16,5 @@
 2019-12-27 11:28:29 - Send SIGINT 9384
 2019-12-27 11:28:29 - SIGINT to 9384 failed - Killing as fallback
 2019-12-27 11:28:29 - Finished inventuchet.exe
+2019-12-28 07:32:32 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\zaymanovaa\AppData\Roaming\npm\node_modules\qckwinsvc\node_modules\node-windows\lib\wrapper.js --file C:\Users\zaymanovaa\Desktop\dev\web-table-for-excel\main.js --log "invent-uchet wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2019-12-28 07:32:32 - Started 988

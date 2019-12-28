@@ -1,8 +1,10 @@
 html
   head
     include layouts/meta-head.pug
-    link(rel="stylesheet", href="./css/admin.css")
+    link(rel="stylesheet", href="./css/minified/admin.min.css")
   body
     //- определяет content страницы
     include layouts/rules.pug
-    script(src="/admin.js")
+    #preloader
+      include preloader.html
+    script(src="/admin.js" defer)

@@ -164,6 +164,7 @@ $(document).ready(() => {
       var input = $($(event.currentTarget).children()[1])
 
       span.hide()
+      input.attr('autofocus')
       input.show()
       
       $this = this
@@ -300,20 +301,16 @@ $(document).ready(() => {
         $(`.${delrowsFront[last]}`).fadeIn('fast')
         delrows.pop()
         delrowsFront.pop()
-      } else {
-        $('.n-undo').hide()
-        $('.n-save').hide()
-      }
-
-      arr = getUnique(arr)
-      tmp = []
-      for (let i = 0; i < arr.length; i++) {
-        tmp.push(JSON.parse(arr[i]))
-      }
-      var indent = tmp.length - 1
-      $(`#${tmp[indent].span}`).text(`${tmp[indent].oldText}`)
-      arr.pop()
-      if (arr.length == 0) {
+      } else if (arr.length !== 0) {
+        arr = getUnique(arr)
+        tmp = []
+        for (let i = 0; i < arr.length; i++) {
+          tmp.push(JSON.parse(arr[i]))
+        }
+        var indent = tmp.length - 1
+        $(`#${tmp[indent].span}`).text(`${tmp[indent].oldText}`)
+        arr.pop()
+      } else if (arr.length == 0) {
         $('.n-undo').hide()
         $('.n-save').hide()
       }
@@ -401,7 +398,7 @@ $(document).ready(() => {
         alert('Ошибка загрузки:' + response)
       }
     } else {
-      alert('У тебя не получиться ты лох :с')
+      alert('Недостаточно прав')
     }
 
   })

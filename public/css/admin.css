@@ -389,6 +389,8 @@
 .departs-control-list {
   display: flex;
   align-items: center;
+  list-style-type: none;
+  justify-content: space-between;
 }
 
 
@@ -396,4 +398,24 @@
   background-color: #34495e !important;
   color: white;
   font-weight: bold;
+}
+
+.addService-control {
+  display: flex;
+  align-items: center;
+  width: 80%;
+}
+
+.addService {
+  justify-content: space-between;
+  padding-right: 10px;
+}
+
+#addService-inp {
+  width: 20%;
+  margin-right: 1%;
+}
+
+#addService-cancel {
+  margin-right: 1%;
 }

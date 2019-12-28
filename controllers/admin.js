@@ -195,6 +195,9 @@ const generateServiceList = function() {
       $('#preloader-servicelist').show()
     },
     success: (result) => {
+      $('.service-ul li').remove()
+      $('.service-ul').append('<li class="item-add-service"></li>')
+      $('.item-add-service').append('<span class="text-item" id="addService"><i class="fas fa-plus"></i> Добавить сервис</span>')
       $('.service-ul').show()
       $('#preloader-servicelist').hide()
       for (let i = 0; i < result.length; i++) {
@@ -215,19 +218,28 @@ const generateDepartList = (currentService) => {
       service: currentService.ShortName
     },
     beforeSend: (xhr) => {
-      console.log('loading...')
+      $('#preloader-departlist').show()
+      $('.departs-list').hide()
     },
     success: (result) => {
+      $('#preloader-departlist').hide()
+      $('.departs-list').attr('service', currentService.ShortName)
+      $('.departs-list').show()
       $('.departs-list li').remove()
-      result.forEach(depart => {
-        let li = `<li class="${depart.Shortname} depart-item" id="${depart.id}"></li>`
-        let departName = `<span class="${depart.Shortname}-span">${depart.Fullname}</span>`
-        let departDelete = `<div class="delDepart"><i class="fas fa-trash-alt"></i></div>`
-        $('.departs-list').append(li)
-        $(`.${depart.Shortname}`).append(`<div class="${depart.Shortname}-warp depart-display-info"></div>`)
-        $(`.${depart.Shortname}-warp`).append(departName)
-        $(`.${depart.Shortname}-warp`).append(departDelete)
-      })
+      $('.departs-list .departNull').remove()
+      if(result.length === 0) {
+        $('.departs-list').append('<span class="departNull">Нет данный для отображения</span>')
+      } else {
+        result.forEach(depart => {
+          let li = `<li class="${depart.Shortname} depart-item" id="${depart.id}"></li>`
+          let departName = `<span class="${depart.Shortname}-span">${depart.Fullname}</span>`
+          let departDelete = `<div class="delDepart"><i class="fas fa-trash-alt"></i></div>`
+          $('.departs-list').append(li)
+          $(`.${depart.Shortname}`).append(`<div class="${depart.Shortname}-warp depart-display-info"></div>`)
+          $(`.${depart.Shortname}-warp`).append(departName)
+          $(`.${depart.Shortname}-warp`).append(departDelete)
+        })
+      }
     }
   })
 }
@@ -259,15 +271,10 @@ const updateServices = () => {
 $(document).ready(() => {
   // new WOW().init()
   //users info variables
-  $('#preloader-userlist').hide()
-  $('#preloader-servicelist').hide()
   $('#addUser-btn').hide()
   $('#user-filter').hide()
   $('#service-filter').hide()
-  $('#preloader-service').hide()
-  $('#preloader-depart').hide()
-  $('#preloader-service-perm').hide()
-  $('#preloader-depart-perm').hide()
+  $('.mini-preloader').hide()
 
   let users = []
   let departs = []
@@ -407,11 +414,22 @@ $(document).ready(() => {
 
   $('.service-ul').on('click', 'li', function() {
     $('.service-ul li').removeClass('active-li')
+
     if($(this).attr('class') == 'item-add-service') {
-        $('.service-editer').show('slide', {direction: 'right'}, 400)
-        // departs = []
-        buildServiceEditor(0)
-    } else {
+      $(this).hide()
+      let li = '<li class="addService-li service-item"></li>'
+      let input = `<input type="text" id="addService-inp" class="form-control" placeholder="Введите название сервиса">`
+      let controls = `<div class="addService-control"></div>`
+      let cancelBtn = `<button type="button" id="addService-cancel" class="btn btn-primary">Отмена</button>`
+      let addBtn = `<button type="button" id="addService-add" class="btn btn-success">Добавить</button>`
+      $('.service-ul').prepend(li)
+      $('.addService-li').append(input)
+      $('.addService-li').append(controls)
+      $('.addService-control').append(cancelBtn)
+      $('.addService-control').append(addBtn)
+
+    } else if ( !$(this).hasClass('addService-li') ) {
+
       for(let i = 0; i < services[0].length; i++) {
         if(services[0][i].id == $(this).attr('id')) {
           currentService = services[0][i]
@@ -420,19 +438,111 @@ $(document).ready(() => {
         $(this).addClass('active-li')
         $('.service-editer').show('slide', {direction: 'right'}, 400)
         buildServiceEditor(currentService)
+    } 
+  })
+
+  $('.service-ul').on('click', '#addService-add', function() {
+    $.ajax({
+      url: `http://${ip}/admin/add-service`,
+      type: 'post',
+      data: {
+        serviceName: $('#addService-inp').val()
+      },
+      success: (result) => {
+        alert(result)
+        services.pop()
+        services.push(JSON.parse(updateServices().responseText))
+        generateServiceList()
+      }
+    })
+  })
+
+  $('.service-ul').on('click', '#addService-cancel', function() {
+    $('.item-add-service').show()
+    $('.addService-li').remove()
+  })
+
+
+  $('.departs-list').on('click', '.depart-display-info', function() {
+    if($(this).hasClass('active-dep')) {
+      $(this).removeClass('active-dep')
+      $(`.depart-li-editor`).remove()
+    } else {
+      $(`.depart-li-editor`).remove()
+      $('.depart-display-info').removeClass('active-dep')
+      $(this).addClass('active-dep')
+      let liClass = $(this).parent().attr('class').split(' ')[0]
+      text = $(`.${liClass}-span`).text()
+      $(this).parent().append(`<div class="depart-li-editor"><input type="text" class="depart-editor-inp form-control" id="${$(this).attr('class')}-inp" value="${text}"/><button type="button" class="btn btn-success" id="saveDepart">Сохранить</button></div>`)
+    }  
+  })
+
+  $('#add-depart').click(() => {
+    $.ajax({
+      url: `http://${ip}/admin/add-depart`,
+      type: 'post',
+      data: {
+        serviceName: $('.departs-list').attr('service')
+      },
+      success: (result) => {
+        alert(result)
+        generateDepartList(currentService)
+      }
+    })
+  })
+
+  $('.departs-list').on('click', '#saveDepart', function() {
+    if (!$('.depart-editor-inp').val()) {
+      alert('Поле должно быть заполнено!')
+    } else {
+      $.post({
+        url: `http://${ip}/admin/save-depart`,
+        data: {
+          depId: $(this).parent().parent().attr('id'),
+          newName: $('.depart-editor-inp').val()
+        },
+        success: (result) => {
+          alert(result)
+          $('.depart-li-editor').remove()
+          $('.depart-display-info').removeClass('active-dep')
+          generateDepartList(currentService)
+        }
+      })
     }
   })
 
-  $('.departs-list').on('click', '.depart-display-info', function() {
-    $(`.depart-li-editor`).remove()
-    
-    let liClass = $(this).parent().attr('class').split(' ')[0]
-    if($(`${liClass} .depart-li-editor`).length > 0) {
-      console.log('qeqeqewq')
-    } else {
-      let liClass = $(this).parent().attr('class').split(' ')[0]
-      text = $(`.${liClass}-span`).text()
-      $(this).parent().append(`<div class="depart-li-editor"><input type="text" class="depart-editor-inp form-control" id="${$(this).attr('class')}-inp" value="${text}"/><button type="button" class="btn btn-success" id="saveDepart">Сохранить</button></div>`)  
+  $('.departs-list').on('click', '.delDepart', function() {
+    if(window.confirm('Вы точно хотите удалить службу?')){
+      $.post({
+        url: `http://${ip}/admin/delete-depart`,
+        data: {
+          depId: $(this).parent().parent().attr('id'),
+          departName: $(this).parent().parent().attr('class').split(' ')[0]
+        },
+        success: (result) => {
+          alert(result)
+          $('.depart-li-editor').remove()
+          $('.depart-display-info').removeClass('active-dep')
+          generateDepartList(currentService)
+        }
+      })
+    }
+  })
+
+  $('#delete-service').click(() => {
+    if(window.confirm('Вы точно хотите удалить сервис?')) {
+      $.post({
+        url: `http://${ip}/admin/delete-service`,
+        data: {
+          serviceId: $('.active-li').attr('id')
+        },
+        success: (result) => {
+          alert(result)
+          $('.service-editer').hide()
+          $('.departs-list').attr('service', '')
+          generateServiceList()
+        }
+      })
     }
   })
 
@@ -534,4 +644,4 @@ $(document).ready(() => {
     })
   })
 
-})    
+})  
