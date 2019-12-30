@@ -1,4 +1,4 @@
-const ip = '10.221.75.105'
+const ip = '10.221.75.7'
 
 $(document).ready(() => {
 

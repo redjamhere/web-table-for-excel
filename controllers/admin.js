@@ -1,4 +1,4 @@
-const ip = '10.221.75.105'
+﻿const ip = '10.221.75.7'
 
 function doMarginTop(marginned, ul, direction) {
   let pixels = 0
@@ -275,7 +275,8 @@ $(document).ready(() => {
   $('#user-filter').hide()
   $('#service-filter').hide()
   $('.mini-preloader').hide()
-
+  $('#preloader').hide()
+	
   let users = []
   let departs = []
   let services = []
@@ -603,6 +604,7 @@ $(document).ready(() => {
           $('.editer').hide()
           $('.users-ul .user-item').remove()
           generateUsersList()
+		  $('.usersList').css('height', `${getChildCountInParent('.users-ul', 'li') + 50}`)
         }
       }
     })

@@ -66,7 +66,7 @@ server.get('/', (req, res) => {
   res.redirect('/table')
 })
 
-server.listen(PORT, () => {
-  console.log(`Server started on port: ${PORT}`)
-})
+server.set('10.221.75.57', '10.221.75.7')
+
+server.listen(PORT, () => { console.log(`Server started on port: ${PORT}`) })
 
