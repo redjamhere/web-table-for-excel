@@ -25,7 +25,7 @@
               span(class="text-item" id="addUser") <i class="fas fa-plus"></i> Добавить пользователя
           .editer
             .close-warp
-              .close-btn
+              .close-userdata-btn
                 i(class="fas fa-times")
             .input-warper
               .userfio
@@ -86,12 +86,12 @@
                 h4.block-header Логин
                 .input-cell
                   label(for="username-inp" class="username-lab") Изменить логин
-                  input(type="text" id="username-inp" name="username-inp" class="data-inp form-control" value="Username")
+                  input(type="text" id="username-inp" name="username-inp" class="data-inp form-control" value="")
               .username-password
                 h4.block-header Пароль
                 .input-cell
                   label(for="password-inp" class="password-lab") Изменить пароль
-                  input(type="password" id="password-inp" name="password-inp" class="data-inp form-control" value="password")
+                  input(type="password" id="password-inp" name="password-inp" class="data-inp form-control" value="123qweASD")
             .button-warper
               button(type="button" id="saveUserSettings" class="btn btn-success") Сохранить изменения
               button(type="button" id="deleteUser-btn" class="btn btn-danger") Удалить пользователя
@@ -112,7 +112,7 @@
               span(class="text-item" id="addService") <i class="fas fa-plus"></i> Добавить сервис
           .service-editer
             .close-warp
-              .close-btn
+              .close-servicedata-btn
                 i(class="fas fa-times")
             .departs-control-panel
               ul.departs-control-list

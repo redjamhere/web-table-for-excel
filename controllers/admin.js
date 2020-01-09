@@ -34,10 +34,12 @@ const buildEditor = (currentUser, departs) => {
     $('#saveUserSettings').hide()
     $('#deleteUser-btn').hide()
     $('#addUser-btn').show()
+	$('#password-inp').val("123qweASD")
   } else {
     $('#saveUserSettings').show()
     $('#deleteUser-btn').show()
     $('#addUser-btn').hide()
+	$('#password-inp').val(currentUser.password)
   }
 
   $("#service-inp option").remove()
@@ -45,9 +47,9 @@ const buildEditor = (currentUser, departs) => {
   $("#depart-inp option").remove()
   $(".choose-depart-list li").remove()
   $('#username-inp').val('')
-
+	
   $.ajax({
-    url: `http://${ip}/admin/services`,
+    url: `http://${ip}/admin/services`,	
     type: 'post',
     beforeSend: (xhr) => {
       $('#preloader-service').show()
@@ -93,9 +95,8 @@ const buildEditor = (currentUser, departs) => {
   } else {
     $('#rwPerm-inp').val('0')
   }
-
+	
   $('#username-inp').val(currentUser.username)
-  $('#password-inp').val(currentUser.password)
 
   $('#lastname-inp').val(currentUser.Lastname)
   $('#firstname-inp').val(currentUser.Firstname)
@@ -397,9 +398,12 @@ $(document).ready(() => {
   $('.users-ul').on('click', 'li', function() {
     $('.users-ul li').removeClass('active-li')
     if($(this).attr('class') == 'item-add') {
+		$('.service-ul li').removeClass('active-li')
+        $('.service-editer').hide('slide', {direction: 'right'}, 400)
         $('.editer').show('slide', {direction: 'right'}, 400)
         departs = []
-        buildEditor(0, departs)
+		
+		buildEditor(0, departs)
     } else {
       for(let i = 0; i < users[0].length; i++) {
         if(users[0][i].id == $(this).attr('id')) {
@@ -408,7 +412,11 @@ $(document).ready(() => {
         }
       } 
         $(this).addClass('active-li')
+		
+		$('.service-ul li').removeClass('active-li')
+        $('.service-editer').hide('slide', {direction: 'right'}, 400)
         $('.editer').show('slide', {direction: 'right'}, 400)
+		
         buildEditor(currentUser, departs)
     }
   })
@@ -428,7 +436,7 @@ $(document).ready(() => {
       $('.addService-li').append(controls)
       $('.addService-control').append(cancelBtn)
       $('.addService-control').append(addBtn)
-
+	
     } else if ( !$(this).hasClass('addService-li') ) {
 
       for(let i = 0; i < services[0].length; i++) {
@@ -437,7 +445,11 @@ $(document).ready(() => {
         }
       } 
         $(this).addClass('active-li')
-        $('.service-editer').show('slide', {direction: 'right'}, 400)
+		
+		$('.users-ul li').removeClass('active-li')
+	    $('.editer').hide('slide', {direction: 'right'}, 400)
+        
+		$('.service-editer').show('slide', {direction: 'right'}, 400)
         buildServiceEditor(currentService)
     } 
   })
@@ -547,10 +559,12 @@ $(document).ready(() => {
     }
   })
 
-  $('.close-btn').click(() => {
-    $('.service-ul li').removeClass('active-li')
+  $('.close-userdata-btn').click(() => {
     $('.users-ul li').removeClass('active-li')
     $('.editer').hide('slide', {direction: 'right'}, 400)
+  })
+  $('.close-servicedata-btn').click(() => {
+    $('.service-ul li').removeClass('active-li')
     $('.service-editer').hide('slide', {direction: 'right'}, 400)
   })
 
